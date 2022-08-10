@@ -49,15 +49,17 @@ class Window(QWidget):
         #self.saveButton.clicked.connect(self.saveChanges)
         #self.addButton.clicked.connect(self.addNewTask)
 
+    global ORDER
+    ORDER = ['ALL_TASKS', 'EACH_DAY']
     def calendarDateChanged(self):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
-        self.updateTableWidget(date_selected)
+        self.updateTableWidget(date_selected, ORDER[0])
 
     # PySide6.QtCore.QDate(2022, 8, 10)
 
-    def updateTableWidget(self, date):
+    def updateTableWidget(self, date, ORDER):
         widgets.tableWidget.clear()
 
         with open('lists.json', 'r') as json_file:
@@ -73,13 +75,21 @@ class Window(QWidget):
             items = result[first_keys[index]] # items receive all items from specific list_key.
             widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
             for it in items:
-                print(row, it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
-                    
-                widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
-                widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
-                widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
-                widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
-                row += 1
+                if ORDER == 'ALL_TASKS':
+                    print(row, it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                    widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
+                    widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
+                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
+                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
+                    row += 1
+                elif ORDER == 'EACH_DAY':
+                    if it['start_time'] == str(date):
+                        print(row, it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                        widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
+                        widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
+                        widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
+                        widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
+                        row += 1
                     
     def updateTaskList(self, date):
         widgets.tasksListWidget.clear()
