@@ -1,0 +1,113 @@
+CALENDARIO. Especificidades a realizar.
+
+[ ] Front-End -> Botões, campo para inserção de tasks, stylesheet bem definido.
+[ ] Back-End -> [ ] Permitir com que o usuário adicione as tasks, e que fiquem salvas em formato json.
+			 -> [ ] Permitir o check task ao usuário, e computar isso no json, mostrando que ele completou a tarefa.
+			 -> [ ] Possibilitar com que essas informações de tarefas fiquem visíveis em alguma aba do programa, de preferência
+			 a principal.
+	
+	============================================================================
+		 
+	Class Task.
+			 
+	Task (atributtes) - 
+		start_date : date, 
+		limit_date (opt) : date,
+		name : string,
+		topic (opt) : string,
+		is_checked : bool;
+	Task (functions) -
+		start(), end(), check(), update(), serialize()
+	
+	Task (description): Cada tarefa possui necessariamente uma data inicial, um prazo limite (opcional), um nome e o tópico (opcional) que a 		acompanha.
+	O tópico nesse sentido pode ser um já existente, isto é, um tópico em que o usuário criou para adicionar tasks a uma TaskList, ou um 		[?]tópico avulso, o qual serve apenas para identificar a tarefa. 
+	
+	Essas tarefas precisam ser armazenadas em um arquivo Json e apresentadas em uma página específica da aplicação para que o usuário tenha
+	sempre demarcadas as atividades e seus prazos, que devem ser realizadas. 
+
+	Feature: Iniciar um pomodoro referenciando determinada tarefa.
+	
+	==========================================================================================
+	
+	Class TaskList.
+	"""A Classe Task List servirá para que o usuário organize tarefas, de cunho específico, a um tópico.
+	Portanto, só será relacionada a uma Task caso esta possua uma TaskList"""
+	
+	Exemplo:
+	
+	TaskList
+		topic : Matemática Aplicada
+		task_list : [(Task1), (Task2), (Task3)] 
+	
+	Requisito: - Usuário deve poder importar tarefas.
+		- Isto é, as tarefas importadas devem ser adicionadas ao arquivo principal das tasks!
+	
+	TaskList (atributtes) - 
+		topic : string
+		task_list: <Object Task list>
+		color: string
+	
+	TaskList (functions)
+		add_task(), remove_task, to_jason(), serialize(), update_json(), import(), export(), update()
+	
+	[??] Como trabalhar individualmente com as tasks de uma TaskList?
+		[???] Estudar, e ver se é possível implementar adequadamente esse comportamento sem Banco de Dados.
+		[???] Por fim, o banco de Dados será necessário?
+			- Funfando por enquanto com o json (09 AGO)
+	
+	[??] Caso eu queira excluir uma task, como isso surtiria efeito no meu .json?
+	
+	[??] Programa fechou! como carregar as tarefas?
+		- Resolvido! Criando novamente as instâncias a partir do Json quando o programa é executado.
+	
+	[X] Requisito: Criar um arquivo para cada track list. (Não necessário, apenas um arquivo para todas as lists!
+	
+	[??] E se não tiver tópico que já exista? Como proceder?
+		-> Permitir com que seja uma task avulsa, sem tópico. Mas onde ela fica armazenada?
+			-> Num json de tarefas avulsas, criando uma espécie de tópico para: 'Indefinidas'
+				-> Como identificar de onde pertence uma tarefa? <- Obter um jeito de organizar tarefas, baseando-se em seu tópico.
+	
+	Requisito: Preciso do create_task(), para justamente entender o funcionamento melhor.
+	
+	[??] E se eu quiser deletar uma tarefa?
+	
+	[X] Requisito: Obter o index de cada tarefa. Para efetuar funcionalidades como a de alterar ou deletar.
+	
+	================================================================================= 
+	
+	Class Main
+	
+	Main (atributtes)
+	
+	Main (functions)
+	
+	
+	==========================
+	
+	Daily-task. Adicionar Tarefas via ...
+	
+	... Layout estilo notion? (Tabelas e tals)
+		Buscar se existem tabelas utilizando o PyQT5 que permitam o input do usuário.
+		
+		- QTableWidget.
+			
+		Requisito: Carregar somente a QTable referente a data selecionada!
+			[ ] Adicionar uma task em tempo real na QTable.
+				[ ] Adicionar, simultaneamente, essa task ao json.
+			[ ] Permitir a alteração de dados na QTable.
+				[ ] Alterar, na exata posição em que estava a task no Json, os dados respectivos.
+				
+				front-end -> Cor do tópico, haverá a necessidade? Será viável realizar essa boiolagem?
+				
+				Adicionar o atributo que marque o status da tarefa 'Não iniciada', 'Em Progresso', 'Concluida'.
+				
+				Fazer hoje (9 ago):
+					Function (import())
+					Function (check())
+		
+		PyQt5 QTableWidget tutorial: Load data, fill tables, format tables [Table Widget]: https://www.youtube.com/watch?v=xL2NdSubiNY
+		QTableWidget from json in Python how to fill: https://stackoverflow.com/questions/71108038/qtablewidget-from-json-in-python-how-to-fill
+		[USEFULL!] Take in multiple user input values using Qt QTableWidget: https://stackoverflow.com/questions/28518913/take-in-multiple-user-input-values-using-qt-qtablewidget
+		
+	
+		
