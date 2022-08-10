@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QMessageBox
+from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate
 from matplotlib import widgets
 from ui_main import Ui_Form
@@ -21,6 +21,11 @@ class Window(QWidget):
 
         self.main = Main()
 
+        self.main.create_list('Math')
+        self.main.create_task(0, str(widgets.calendarWidget.selectedDate().toPython()), '2', 'Do some exercises')
+        self.main.create_task(0, str(widgets.calendarWidget.selectedDate().toPython()), '2', 'Do some exercises')
+        self.main.create_task(0, str(widgets.calendarWidget.selectedDate().toPython()), '2', 'Do some exercises')
+
         self.main.update_json()
 
         self.calendarDateChanged()
@@ -34,8 +39,32 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
-        self.updateTaskList(date_selected)
+        self.updateTableWidget(date_selected)
 
+    def updateTableWidget(self, date):
+        widgets.tableWidget.clear()
+
+        with open('lists.json', 'r') as json_file:
+            results = json.load(json_file)
+
+        first_keys = []
+        for l in results['lists']:
+            first_key = next(iter(l))   # Get the first key for a list
+            first_keys.append(first_key)
+
+        for index, result in enumerate(results['lists']):
+            items = result[first_keys[index]] # items receive all items from specific list_key.
+            widgets.tableWidget.setRowCount(len(items))
+            for it in items:
+                if (it['start_time'] == str(date)):
+                    print(it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                    
+                    # why is not displaying? :
+                    widgets.tableWidget.setItem(index, 0, QTableWidgetItem(it['active_list']))
+                    widgets.tableWidget.setItem(index, 1, QTableWidgetItem(it['start_time']))
+                    widgets.tableWidget.setItem(index, 2, QTableWidgetItem(it['end_time']))
+                    widgets.tableWidget.setItem(index, 3, QTableWidgetItem(it['name']))
+                    
     def updateTaskList(self, date):
         widgets.tasksListWidget.clear()
             
@@ -43,7 +72,6 @@ class Window(QWidget):
             results = json.load(json_file)
     
         first_keys = []
-        
         for l in results['lists']:
             first_key = next(iter(l))   # Get the first key for a list
             first_keys.append(first_key)

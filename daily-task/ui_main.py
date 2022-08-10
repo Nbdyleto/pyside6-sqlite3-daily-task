@@ -27,37 +27,19 @@ class Ui_Form(object):
         self.calendarWidget = QCalendarWidget(Form)
         self.calendarWidget.setObjectName(u"calendarWidget")
         self.calendarWidget.setGeometry(QRect(40, 150, 411, 311))
-        
-        """
-        self.calendarWidget.setStyleSheet(u""
-        "QCalendarWidget QAbstractItemView {\n"
-            "border : 4px solid rgb(68, 71, 90); \n"
-            "background-color:#44475a; \n"
-        "} \n"
-        "QCalendarWidget QToolButton {\n"
-            "background-color:#44475a; \n"
-        "}\n"
-        )
-        """
 
-        self.tasksListWidget = QListWidget(Form)
-        self.tasksListWidget.setObjectName(u"tasksListWidget")
-        self.tasksListWidget.setGeometry(QRect(480, 150, 341, 301))
-        self.tasksListWidget.setStyleSheet(u"font:12pt;")
-        self.saveButton = QPushButton(Form)
-        self.saveButton.setObjectName(u"saveButton")
-        self.saveButton.setGeometry(QRect(480, 460, 341, 28))
-        self.saveButton.setStyleSheet(u"border-radius:10px;\n"
-"background-color: #01BFFF;\n"
-"color:white;\n"
-"font:11pt;")
-        self.addButton = QPushButton(Form)
-        self.addButton.setObjectName(u"addButton")
-        self.addButton.setGeometry(QRect(730, 110, 93, 28))
-        self.addButton.setStyleSheet(u"border-radius:10px;\n"
-"background-color: #01BFFF;\n"
-"color:white;\n"
-"")
+        self.tableWidget = QTableWidget(Form)
+        if (self.tableWidget.columnCount() < 3):
+            self.tableWidget.setColumnCount(3)
+        __qtablewidgetitem = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
+        __qtablewidgetitem1 = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
+        __qtablewidgetitem2 = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
+        self.tableWidget.setObjectName(u"tableWidget")
+        self.tableWidget.setGeometry(QRect(480, 150, 341, 301))
+
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(0, 0, 851, 101))
@@ -66,10 +48,6 @@ class Ui_Form(object):
 "color:white;\n"
 "border-radius:8px;")
         self.label.setAlignment(Qt.AlignCenter)
-        self.taskLineEdit = QLineEdit(Form)
-        self.taskLineEdit.setObjectName(u"taskLineEdit")
-        self.taskLineEdit.setGeometry(QRect(480, 110, 241, 31))
-        self.taskLineEdit.setStyleSheet(u"font:12pt;")
 
         self.retranslateUi(Form)
 
@@ -78,8 +56,8 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.saveButton.setText(QCoreApplication.translate("Form", u"Save Changes", None))
-        self.addButton.setText(QCoreApplication.translate("Form", u"Add new", None))
+        #self.saveButton.setText(QCoreApplication.translate("Form", u"Save Changes", None))
+        #self.addButton.setText(QCoreApplication.translate("Form", u"Add new", None))
         self.label.setText(QCoreApplication.translate("Form", u"Daily Task Planner", None))
     # retranslateUi
 

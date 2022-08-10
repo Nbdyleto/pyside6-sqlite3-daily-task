@@ -1,3 +1,101 @@
 {
-  "lists": []
+  "lists": [
+    {
+      "Math": [
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-11",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-12",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-11",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-12",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "2",
+          "name": "Do some exercises",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "Math": []
+    },
+    {
+      "Math": []
+    },
+    {
+      "Math": []
+    }
+  ]
 }
