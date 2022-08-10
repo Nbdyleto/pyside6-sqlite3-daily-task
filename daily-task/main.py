@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate
+from PySide6.QtGui import QBrush, QColor
 from matplotlib import widgets
 from ui_main import Ui_Form
 import sys
@@ -156,5 +157,6 @@ class Window(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Window()
+    window.setStyleSheet('background-color: #282a36;')
     window.show()
     sys.exit(app.exec())
