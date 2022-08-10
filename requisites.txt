@@ -91,7 +91,9 @@ CALENDARIO. Especificidades a realizar.
 		
 		- QTableWidget.
 			
-		Requisito: Carregar somente a QTable referente a data selecionada!
+		[Requisito Repensado!] (Carregar somente a QTable referente a data selecionada!)
+		- Mostrar todas as tasks. Pensar alguma outra maneira do usuário saber as tasks referentes a alguma data!
+
 			[ ] Adicionar uma task em tempo real na QTable.
 				[ ] Adicionar, simultaneamente, essa task ao json.
 			[ ] Permitir a alteração de dados na QTable.

@@ -5,97 +5,57 @@
         {
           "active_list": "Math",
           "start_time": "2022-08-10",
-          "end_time": "2",
+          "end_time": "0",
           "name": "Do some exercises",
           "checked": false
         },
         {
           "active_list": "Math",
           "start_time": "2022-08-11",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-12",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
+          "end_time": "1",
+          "name": "Study Functions",
           "checked": false
         },
         {
           "active_list": "Math",
           "start_time": "2022-08-11",
           "end_time": "2",
-          "name": "Do some exercises",
+          "name": "Solve problems",
+          "checked": false
+        },
+        {
+          "active_list": "Math",
+          "start_time": "2022-08-10",
+          "end_time": "1",
+          "name": "Study Math",
           "checked": false
         },
         {
           "active_list": "Math",
           "start_time": "2022-08-12",
           "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
-          "checked": false
-        },
-        {
-          "active_list": "Math",
-          "start_time": "2022-08-10",
-          "end_time": "2",
-          "name": "Do some exercises",
+          "name": "Solve Calcule III",
           "checked": false
         }
       ]
     },
     {
-      "Math": []
-    },
-    {
-      "Math": []
-    },
-    {
-      "Math": []
+      "Geo": [
+        {
+          "active_list": "Geo",
+          "start_time": "2022-08-10",
+          "end_time": "3",
+          "name": "Study Rain",
+          "checked": false
+        },
+        {
+          "active_list": "Geo",
+          "start_time": "2022-08-10",
+          "end_time": "3",
+          "name": "Study Geopolitcs",
+          "checked": false
+        }
+      ]
     }
   ]
 }
