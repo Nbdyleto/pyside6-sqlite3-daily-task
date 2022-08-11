@@ -148,6 +148,8 @@ class Ui_Form(object):
         self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
         __qtablewidgetitem3 = QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, __qtablewidgetitem3)
+        __qtablewidgetitem4 = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
         self.tableWidget.setObjectName(u"tableWidget")
         #self.tableWidget.setGeometry(QRect(480, 150, 480, 301))
         self.tableWidget.setHorizontalHeaderLabels(['a', 'b', 'c', 'd'])

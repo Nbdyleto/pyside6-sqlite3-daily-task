@@ -109,6 +109,7 @@ CALENDARIO. Especificidades a realizar.
 		
 		PyQt5 QTableWidget tutorial: Load data, fill tables, format tables [Table Widget]: https://www.youtube.com/watch?v=xL2NdSubiNY
 		QTableWidget from json in Python how to fill: https://stackoverflow.com/questions/71108038/qtablewidget-from-json-in-python-how-to-fill
+		Retrieving cell data from a selected cell in a tablewidget: https://stackoverflow.com/questions/14588479/retrieving-cell-data-from-a-selected-cell-in-a-tablewidget
 		[USEFULL!] Take in multiple user input values using Qt QTableWidget: https://stackoverflow.com/questions/28518913/take-in-multiple-user-input-values-using-qt-qtablewidget
 		
 	

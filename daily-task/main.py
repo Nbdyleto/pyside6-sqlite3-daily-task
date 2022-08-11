@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, QPoint
 from PySide6.QtGui import QBrush, QColor
 from matplotlib import widgets
 from ui_main import Ui_Form
@@ -27,28 +27,55 @@ class Window(QWidget):
 
         self.main = Main()
 
-        """
+        
         self.main.create_list('Math')
-        self.main.create_task(0, str(QDate(2022, 8, 10).toPython()), '0', 'Do some exercises')
-        self.main.create_task(0, str(QDate(2022, 8, 11).toPython()), '1', 'Study Functions')
-        self.main.create_task(0, str(QDate(2022, 8, 11).toPython()), '2', 'Solve problems')
+        self.main.create_task(0, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 13).toPython()), 'Do some exercises')
+        self.main.create_task(1, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 15).toPython()), 'Study Functions')
+        self.main.create_task(2, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve problems')
         self.main.create_list('Geo')
-        self.main.create_task(1, str(widgets.calendarWidget.selectedDate().toPython()), '3', 'Study Rain')
+        self.main.create_task(3, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 17).toPython()), 'Study Rain')
 
-        self.main.create_task(0, str(QDate(2022, 8, 10).toPython()), '1', 'Study Math')
-        self.main.create_task(0, str(QDate(2022, 8, 12).toPython()), '2', 'Solve Calcule III')
+        self.main.create_task(4, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 12).toPython()), 'Study Math')
+        self.main.create_task(5, 0, str(QDate(2022, 8, 12).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve Calcule III')
 
-        self.main.create_task(1, str(widgets.calendarWidget.selectedDate().toPython()), '3', 'Study Geopolitcs')
-        """
-
+        self.main.create_task(6, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 19).toPython()), 'Study Geopolitcs')
+        
         self.main.update_json()
 
         self.calendarDateChanged()
 
         widgets.calendarWidget.selectionChanged.connect(self.calendarDateChanged)
 
-        #self.saveButton.clicked.connect(self.saveChanges)
-        #self.addButton.clicked.connect(self.addNewTask)
+        #widgets.tableWidget.cellClicked.connect(self.event_test)
+        widgets.tableWidget.itemChanged.connect(self.change_data)
+
+    def event_test(self, row, col):
+        print(row, col)
+        item = widgets.tableWidget.item(row, col)
+        print(item.text())
+
+    def change_data(self, item):
+        row, col = item.row(), item.column()
+        print(f'new data: {item.text()} at pos {row, col}')
+        task_id = (widgets.tableWidget.item(row, 0)).text()
+
+        with open('lists.json', 'r') as json_file:
+            results = json.load(json_file)
+
+        first_keys = []
+        for l in results['lists']:
+            first_key = next(iter(l))   # Get the first key for a list
+            first_keys.append(first_key)
+
+        for index, result in enumerate(results['lists']):
+            items = result[first_keys[index]] # items receive all items from specific list_key.
+            widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
+            for it in items:
+                if it['task_id'] == int(task_id):
+                    pass
+
+        
+        #self.main.update_json()
 
     global ORDER
     ORDER = ['ALL_TASKS', 'EACH_DAY']
@@ -77,44 +104,21 @@ class Window(QWidget):
             widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
             for it in items:
                 if ORDER == 'ALL_TASKS':
-                    print(row, it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
-                    widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
-                    widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
-                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
-                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
+                    print(it['task_id'], it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                    widgets.tableWidget.setItem(row, 0, QTableWidgetItem(str(it['task_id'])))
+                    widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['active_list']))
+                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['start_time']))
+                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['end_time']))
+                    widgets.tableWidget.setItem(row, 4, QTableWidgetItem(it['name']))
                     row += 1
                 elif ORDER == 'EACH_DAY':
                     if it['start_time'] == str(date):
-                        print(row, it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                        print(it['task_id'], it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
                         widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
                         widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
                         widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
                         widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
                         row += 1
-                    
-    def updateTaskList(self, date):
-        widgets.tasksListWidget.clear()
-            
-        with open('lists.json', 'r') as json_file:
-            results = json.load(json_file)
-    
-        first_keys = []
-        for l in results['lists']:
-            first_key = next(iter(l))   # Get the first key for a list
-            first_keys.append(first_key)
-
-        for index, result in enumerate(results['lists']):
-            items = result[first_keys[index]] # items receive all items from specific list_key.
-            for it in items:
-                if (it['start_time'] == str(date)):
-                    print(it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
-                    item = QListWidgetItem(f"{it['active_list']} - {it['name']}")
-                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-                    if it['checked'] == True:
-                        item.setCheckState(Qt.Checked)
-                    elif it['checked'] == False:
-                        item.setCheckState(Qt.Unchecked)
-                    widgets.tasksListWidget.addItem(item)
 """
     def saveChanges(self):
         db = sqlite3.connect("data.db")

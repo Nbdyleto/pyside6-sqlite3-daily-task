@@ -1,8 +1,10 @@
 import json
 import os.path
+from ui_main import Ui_Form
 
 class Task:
-    def __init__(self, active_list, start_date, limit_date, name, checked=False):
+    def __init__(self, id, active_list, start_date, limit_date, name, checked=False):
+        self.id = id
         self.active_list = active_list
         self.start_date = start_date
         self.limit_date = limit_date
@@ -32,6 +34,7 @@ class Task:
     
     def serialize(self):
         return {
+            'task_id' : self.id,
             'active_list' : self.active_list.topic,
             'start_time' : self.start_date,
             'end_time' : self.limit_date,
@@ -47,13 +50,6 @@ class TaskList:
 
     def add_task(self, task):
         self.task_list.append(task)  
-
-    """
-    # save individually list files:
-    def update_json(self):
-        with open(f'{self.topic}.json', 'w') as json_file:
-            json.dump(self.serialize(), json_file, indent=2)
-    """
 
     def serialize(self):
         return {
@@ -86,12 +82,14 @@ class Main:
             list_keys.append(key)
         
         # Instancing:
+        task_id = 0
         for topic_id, result in enumerate(self.no_instance_list['lists']):
             items = result[list_keys[topic_id]] # items receive all items from specific list_key.
             self.create_list(list_keys[topic_id])   # create a list by the name of actual list_key
             # get each item (task), individually, and create instance from:
             for item in items:
-                self.create_task(topic_id, item['start_time'], item['end_time'], item['name'])
+                self.create_task(task_id, topic_id, item['start_time'], item['end_time'], item['name'])
+            task_id += 1
 
         self.update_json()
 
@@ -108,8 +106,8 @@ class Main:
         self.instance_list.append(task_list)
         self.update_json()
 
-    def create_task(self, topic_id, start_time, end_time, name):
-        task = Task(self.instance_list[topic_id], start_time, end_time, name)
+    def create_task(self, task_id, topic_id, start_time, end_time, name):
+        task = Task(task_id, self.instance_list[topic_id], start_time, end_time, name)
         self.instance_list[topic_id].add_task(task)
         self.update_json()
 
@@ -130,3 +128,7 @@ class Main:
     
     def get_lists(self):
         return self.instance_list
+
+    def test(self):
+        x = self.instance_list[1].serialize()
+        print(x['Geo'][0])
