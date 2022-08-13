@@ -1,6 +1,5 @@
 import json
 import os.path
-from ui_main import Ui_Form
 
 class Task:
     def __init__(self, id, active_list, start_date, limit_date, name, checked=False):
@@ -129,6 +128,13 @@ class Main:
     def get_lists(self):
         return self.instance_list
 
-    def test(self):
-        x = self.instance_list[1].serialize()
-        print(x['Geo'][0])
+    def change_data(self, topic_id, task_id, new_data):
+        
+        topic_list = self.instance_list[topic_id].serialize()
+        for index, task in enumerate(topic_list['Math']):
+            if str(task['task_id']) == task_id:
+                print(f'Old task: {self.instance_list[topic_id].task_list[index].serialize()}')
+                self.instance_list[topic_id].task_list[index].name = new_data
+                print(f'New task: {self.instance_list[topic_id].task_list[index].serialize()}')
+
+        self.update_json()

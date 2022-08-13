@@ -56,23 +56,17 @@ class Window(QWidget):
 
     def change_data(self, item):
         row, col = item.row(), item.column()
+        new_data = item.text()
         print(f'new data: {item.text()} at pos {row, col}')
+        topic_id = 0
+        if (widgets.tableWidget.item(row, 1) == 'Math'):
+            topic_id = 0
+        elif (widgets.tableWidget.item(row, 1) == 'Geo'):
+            topic_id = 1
         task_id = (widgets.tableWidget.item(row, 0)).text()
+        new_data = (widgets.tableWidget.item(row, col)).text()
 
-        with open('lists.json', 'r') as json_file:
-            results = json.load(json_file)
-
-        first_keys = []
-        for l in results['lists']:
-            first_key = next(iter(l))   # Get the first key for a list
-            first_keys.append(first_key)
-
-        for index, result in enumerate(results['lists']):
-            items = result[first_keys[index]] # items receive all items from specific list_key.
-            widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
-            for it in items:
-                if it['task_id'] == int(task_id):
-                    pass
+        self.main.change_data(topic_id, task_id, new_data)
 
         
         #self.main.update_json()
