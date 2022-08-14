@@ -27,7 +27,7 @@ class Window(QWidget):
 
         self.main = Main()
 
-        
+        """
         self.main.create_list('Math')
         self.main.create_task(0, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 13).toPython()), 'Do some exercises')
         self.main.create_task(1, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 15).toPython()), 'Study Functions')
@@ -39,6 +39,7 @@ class Window(QWidget):
         self.main.create_task(5, 0, str(QDate(2022, 8, 12).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve Calcule III')
 
         self.main.create_task(6, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 19).toPython()), 'Study Geopolitcs')
+        """
         
         self.main.update_json()
 
@@ -55,19 +56,23 @@ class Window(QWidget):
         print(item.text())
 
     def change_data(self, item):
-        row, col = item.row(), item.column()
+        new_data_row, new_data_col = item.row(), item.column()
         new_data = item.text()
-        print(f'new data: {item.text()} at pos {row, col}')
+        print(f'new data: {item.text()} at pos {new_data_row, new_data_col}')
+        
         topic_id = 0
-        if (widgets.tableWidget.item(row, 1) == 'Math'):
+        if (widgets.tableWidget.item(new_data_row, 1).text() == 'Math'):
             topic_id = 0
-        elif (widgets.tableWidget.item(row, 1) == 'Geo'):
+        elif (widgets.tableWidget.item(new_data_row, 1).text() == 'Geo'):
             topic_id = 1
-        task_id = (widgets.tableWidget.item(row, 0)).text()
-        new_data = (widgets.tableWidget.item(row, col)).text()
+            
+        task_id = widgets.tableWidget.item(new_data_row, 0).text()
+        new_data = widgets.tableWidget.item(new_data_row, new_data_col).text()
 
-        self.main.change_data(topic_id, task_id, new_data)
-
+        if new_data_col == 0 or new_data_col == 1:
+            print("can't change id or topic from this task!")
+        else:
+            self.main.change_data(topic_id, task_id, new_data, int(new_data_col))
         
         #self.main.update_json()
 
@@ -98,59 +103,21 @@ class Window(QWidget):
             widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
             for it in items:
                 if ORDER == 'ALL_TASKS':
-                    print(it['task_id'], it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                    print(it['task_id'], it['active_list'], it['start_date'], it['limit_date'], it['name'], '\n')
                     widgets.tableWidget.setItem(row, 0, QTableWidgetItem(str(it['task_id'])))
                     widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['active_list']))
-                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['start_time']))
-                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['end_time']))
+                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['start_date']))
+                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['limit_date']))
                     widgets.tableWidget.setItem(row, 4, QTableWidgetItem(it['name']))
                     row += 1
                 elif ORDER == 'EACH_DAY':
-                    if it['start_time'] == str(date):
-                        print(it['task_id'], it['active_list'], it['start_time'], it['end_time'], it['name'], '\n')
+                    if it['start_date'] == str(date):
+                        print(it['task_id'], it['active_list'], it['start_date'], it['limit_date'], it['name'], '\n')
                         widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
-                        widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_time']))
-                        widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['end_time']))
+                        widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_date']))
+                        widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['limit_date']))
                         widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
                         row += 1
-"""
-    def saveChanges(self):
-        db = sqlite3.connect("data.db")
-        cursor = db.cursor()
-        date = self.calendarWidget.selectedDate().toPyDate()
-
-        for i in range(self.tasksListWidget.count()):
-            item = self.tasksListWidget.item(i)
-            task = item.text()
-            if item.checkState() == QtCore.Qt.Checked:
-                query = "UPDATE tasks SET completed = 'YES' WHERE task = ? AND date = ?"
-            else:
-                query = "UPDATE tasks SET completed = 'NO' WHERE task = ? AND date = ?"
-            row = (task, date,)
-            cursor.execute(query, row)
-        db.commit()
-
-        messageBox = QMessageBox()
-        messageBox.setText("Changes saved.")
-        messageBox.setStandardButtons(QMessageBox.Ok)
-        messageBox.exec()
-    
-
-    def addNewTask(self):
-        db = sqlite3.connect("data.db")
-        cursor = db.cursor()
-
-        newTask = str(self.taskLineEdit.text())
-        date = self.calendarWidget.selectedDate().toPyDate()
-
-        query = "INSERT INTO tasks(task, completed, date) VALUES (?,?,?)"
-        row = (newTask, "NO", date,)
-
-        cursor.execute(query, row)
-        db.commit()
-        self.updateTaskList(date)
-        self.taskLineEdit.clear()
-"""
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
