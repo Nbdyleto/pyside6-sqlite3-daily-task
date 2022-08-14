@@ -27,7 +27,7 @@ class Window(QWidget):
 
         self.main = Main()
 
-        """
+        #"""
         self.main.create_list('Math')
         self.main.create_task(0, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 13).toPython()), 'Do some exercises')
         self.main.create_task(1, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 15).toPython()), 'Study Functions')
@@ -39,7 +39,7 @@ class Window(QWidget):
         self.main.create_task(5, 0, str(QDate(2022, 8, 12).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve Calcule III')
 
         self.main.create_task(6, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 19).toPython()), 'Study Geopolitcs')
-        """
+        #"""
         
         self.main.update_json()
 
@@ -59,22 +59,23 @@ class Window(QWidget):
         new_data_row, new_data_col = item.row(), item.column()
         new_data = item.text()
         print(f'new data: {item.text()} at pos {new_data_row, new_data_col}')
-        
-        topic_id = 0
-        if (widgets.tableWidget.item(new_data_row, 1).text() == 'Math'):
-            topic_id = 0
-        elif (widgets.tableWidget.item(new_data_row, 1).text() == 'Geo'):
-            topic_id = 1
-            
-        task_id = widgets.tableWidget.item(new_data_row, 0).text()
-        new_data = widgets.tableWidget.item(new_data_row, new_data_col).text()
 
-        if new_data_col == 0 or new_data_col == 1:
-            print("can't change id or topic from this task!")
+        if item.text() == '':
+            pass
         else:
-            self.main.change_data(topic_id, task_id, new_data, int(new_data_col))
-        
-        #self.main.update_json()
+            topic_id = 0
+            if (widgets.tableWidget.item(new_data_row, 1).text() == 'Math'):
+                topic_id = 0
+            elif (widgets.tableWidget.item(new_data_row, 1).text() == 'Geo'):
+                topic_id = 1
+                
+            task_id = widgets.tableWidget.item(new_data_row, 0).text()
+            new_data = widgets.tableWidget.item(new_data_row, new_data_col).text()
+
+            if new_data_col == 0 or new_data_col == 1:
+                print("can't change id or topic from this task!")
+            else:
+                self.main.change_data(topic_id, task_id, new_data, int(new_data_col))
 
     global ORDER
     ORDER = ['ALL_TASKS', 'EACH_DAY']
