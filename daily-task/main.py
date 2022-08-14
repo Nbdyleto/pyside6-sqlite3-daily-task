@@ -20,12 +20,14 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(1,100)
         widgets.tableWidget.setColumnWidth(2,100)
         widgets.tableWidget.setColumnWidth(3,150)
+        widgets.tableWidget.setRowCount(15)
+        widgets.tableWidget.setItem(0, 0, QTableWidgetItem('test'))
 
-        self.calendar_date_changed
+        self.calendar_date_changed()
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
 
-        widgets.tableWidget.itemChanged.connect(self.change_data)
+        widgets.tableWidget.itemChanged.connect(self.add_new_task)
 
     def event_test(self, row, col):
         print(row, col)
@@ -39,73 +41,74 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
-        self.updateTableWidget(date_selected)
+        self.update_table_widget(date_selected)
 
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
 
+    def update_table_widget(self, date):
+        widgets.tableWidget.clear()
 
-    def updateTaskList(self, date):
-        self.tasksListWidget.clear()
+        db = sqlite3.connect("daily-task/data.db")
+        cursor = db.cursor()
+        #self.create_table()
+        try:
+            query = "SELECT task, completed FROM tasks WHERE date = ?"
+            row_date = (date,)
+        except Exception:  
+            self.create_table()
+            query = "SELECT task, completed FROM tasks WHERE date = ?"
+            row_date = (date,)
 
-        db = sqlite3.connect("data.db")
+        results = cursor.execute(query, row_date).fetchall()
+        for row, result in enumerate(results):
+            print('aaa ', result[0], result[1])
+            widgets.tableWidget.setItem(row, 0, QTableWidgetItem(result[0]))
+            widgets.tableWidget.setItem(row, 1, QTableWidgetItem(result[1]))
+            #widgets.tableWidget.setItem(row, 2, QTableWidgetItem(result[2]))
+            print(result, '\n')
+    
+    def create_table(self):
+        db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
 
-        query = "SELECT task, completed FROM tasks WHERE date = ?"
-        row = (date,)
-        results = cursor.execute(query, row).fetchall()
-        for result in results:
-            item = QListWidgetItem(str(result[0]))
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-            if result[1] == "YES":
-                item.setCheckState(QtCore.Qt.Checked)
-            elif result[1] == "NO":
-                item.setCheckState(QtCore.Qt.Unchecked)
-            self.tasksListWidget.addItem(item)
+        cursor.execute('DROP TABLE IF EXISTS TASKS')
 
+        table = """ CREATE TABLE TASKS (
+                    task VARCHAR(255) NOT NULL, 
+                    completed VARCHAR(255) NOT NULL,
+                    date VARCHAR(15) NOT NULL
+        );"""
+        
+        cursor.execute(table)
+        print('table is ready!')
 
     def saveChanges(self):
-        db = sqlite3.connect("data.db")
-        cursor = db.cursor()
-        date = self.calendarWidget.selectedDate().toPyDate()
+        pass
 
-        for i in range(self.tasksListWidget.count()):
-            item = self.tasksListWidget.item(i)
-            task = item.text()
-            if item.checkState() == QtCore.Qt.Checked:
-                query = "UPDATE tasks SET completed = 'YES' WHERE task = ? AND date = ?"
-            else:
-                query = "UPDATE tasks SET completed = 'NO' WHERE task = ? AND date = ?"
-            row = (task, date,)
-            cursor.execute(query, row)
-        db.commit()
+    # atributtes from each task:
+    # name, topic, start_date, limit_date, checked.
 
-        messageBox = QMessageBox()
-        messageBox.setText("Changes saved.")
-        messageBox.setStandardButtons(QMessageBox.Ok)
-        messageBox.exec()
+    def add_new_task(self, item):
+        row = item.row()
 
-    def addNewTask(self):
-        db = sqlite3.connect("data.db")
+        db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
 
-        newTask = str(self.taskLineEdit.text())
-        date = self.calendarWidget.selectedDate().toPyDate()
+        new_task = widgets.tableWidget.item(row, 0).text()
+
+        #newTask = str(self.taskLineEdit.text())
+        date = widgets.calendarWidget.selectedDate().toPython()
 
         query = "INSERT INTO tasks(task, completed, date) VALUES (?,?,?)"
-        row = (newTask, "NO", date,)
+        row_data = (new_task, "NO", date,)
 
-        cursor.execute(query, row)
+        cursor.execute(query, row_data)
         db.commit()
-        self.updateTaskList(date)
-        self.taskLineEdit.clear()
-
+        self.update_table_widget(date)
 
     #####
 
     # PySide6.QtCore.QDate(2022, 8, 10)
-
-    def updateTableWidget(self, date):
-        widgets.tableWidget.clear()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
