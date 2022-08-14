@@ -4,11 +4,7 @@ from PySide6.QtGui import QBrush, QColor
 from matplotlib import widgets
 from ui_main import Ui_Form
 import sys
-
-#from qtconsole.qt import QtCore
-
-import json
-from tasks import *
+import sqlite3
 
 class Window(QWidget):
     def __init__(self):
@@ -25,29 +21,10 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(2,100)
         widgets.tableWidget.setColumnWidth(3,150)
 
-        self.main = Main()
+        self.calendar_date_changed
 
-        #"""
-        self.main.create_list('Math')
-        self.main.create_task(0, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 13).toPython()), 'Do some exercises')
-        self.main.create_task(1, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 15).toPython()), 'Study Functions')
-        self.main.create_task(2, 0, str(QDate(2022, 8, 11).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve problems')
-        self.main.create_list('Geo')
-        self.main.create_task(3, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 17).toPython()), 'Study Rain')
+        widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
 
-        self.main.create_task(4, 0, str(QDate(2022, 8, 10).toPython()), str(QDate(2022, 8, 12).toPython()), 'Study Math')
-        self.main.create_task(5, 0, str(QDate(2022, 8, 12).toPython()), str(QDate(2022, 8, 17).toPython()), 'Solve Calcule III')
-
-        self.main.create_task(6, 1, str(widgets.calendarWidget.selectedDate().toPython()), str(QDate(2022, 8, 19).toPython()), 'Study Geopolitcs')
-        #"""
-        
-        self.main.update_json()
-
-        self.calendarDateChanged()
-
-        widgets.calendarWidget.selectionChanged.connect(self.calendarDateChanged)
-
-        #widgets.tableWidget.cellClicked.connect(self.event_test)
         widgets.tableWidget.itemChanged.connect(self.change_data)
 
     def event_test(self, row, col):
@@ -56,69 +33,78 @@ class Window(QWidget):
         print(item.text())
 
     def change_data(self, item):
-        new_data_row, new_data_col = item.row(), item.column()
-        new_data = item.text()
-        print(f'new data: {item.text()} at pos {new_data_row, new_data_col}')
+        pass
 
-        if item.text() == '':
-            pass
-        else:
-            topic_id = 0
-            if (widgets.tableWidget.item(new_data_row, 1).text() == 'Math'):
-                topic_id = 0
-            elif (widgets.tableWidget.item(new_data_row, 1).text() == 'Geo'):
-                topic_id = 1
-                
-            task_id = widgets.tableWidget.item(new_data_row, 0).text()
-            new_data = widgets.tableWidget.item(new_data_row, new_data_col).text()
-
-            if new_data_col == 0 or new_data_col == 1:
-                print("can't change id or topic from this task!")
-            else:
-                self.main.change_data(topic_id, task_id, new_data, int(new_data_col))
-
-    global ORDER
-    ORDER = ['ALL_TASKS', 'EACH_DAY']
-    def calendarDateChanged(self):
+    def calendar_date_changed(self):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
-        self.updateTableWidget(date_selected, ORDER[0])
+        self.updateTableWidget(date_selected)
+
+    # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
+
+    def updateTaskList(self, date):
+        self.tasksListWidget.clear()
+
+        db = sqlite3.connect("data.db")
+        cursor = db.cursor()
+
+        query = "SELECT task, completed FROM tasks WHERE date = ?"
+        row = (date,)
+        results = cursor.execute(query, row).fetchall()
+        for result in results:
+            item = QListWidgetItem(str(result[0]))
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            if result[1] == "YES":
+                item.setCheckState(QtCore.Qt.Checked)
+            elif result[1] == "NO":
+                item.setCheckState(QtCore.Qt.Unchecked)
+            self.tasksListWidget.addItem(item)
+
+
+    def saveChanges(self):
+        db = sqlite3.connect("data.db")
+        cursor = db.cursor()
+        date = self.calendarWidget.selectedDate().toPyDate()
+
+        for i in range(self.tasksListWidget.count()):
+            item = self.tasksListWidget.item(i)
+            task = item.text()
+            if item.checkState() == QtCore.Qt.Checked:
+                query = "UPDATE tasks SET completed = 'YES' WHERE task = ? AND date = ?"
+            else:
+                query = "UPDATE tasks SET completed = 'NO' WHERE task = ? AND date = ?"
+            row = (task, date,)
+            cursor.execute(query, row)
+        db.commit()
+
+        messageBox = QMessageBox()
+        messageBox.setText("Changes saved.")
+        messageBox.setStandardButtons(QMessageBox.Ok)
+        messageBox.exec()
+
+    def addNewTask(self):
+        db = sqlite3.connect("data.db")
+        cursor = db.cursor()
+
+        newTask = str(self.taskLineEdit.text())
+        date = self.calendarWidget.selectedDate().toPyDate()
+
+        query = "INSERT INTO tasks(task, completed, date) VALUES (?,?,?)"
+        row = (newTask, "NO", date,)
+
+        cursor.execute(query, row)
+        db.commit()
+        self.updateTaskList(date)
+        self.taskLineEdit.clear()
+
+
+    #####
 
     # PySide6.QtCore.QDate(2022, 8, 10)
 
-    def updateTableWidget(self, date, ORDER):
+    def updateTableWidget(self, date):
         widgets.tableWidget.clear()
-
-        with open('lists.json', 'r') as json_file:
-            results = json.load(json_file)
-
-        first_keys = []
-        for l in results['lists']:
-            first_key = next(iter(l))   # Get the first key for a list
-            first_keys.append(first_key)
-
-        row = 0
-        for index, result in enumerate(results['lists']):
-            items = result[first_keys[index]] # items receive all items from specific list_key.
-            widgets.tableWidget.setRowCount(15) # [ ] Set a valid row count...
-            for it in items:
-                if ORDER == 'ALL_TASKS':
-                    print(it['task_id'], it['active_list'], it['start_date'], it['limit_date'], it['name'], '\n')
-                    widgets.tableWidget.setItem(row, 0, QTableWidgetItem(str(it['task_id'])))
-                    widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['active_list']))
-                    widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['start_date']))
-                    widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['limit_date']))
-                    widgets.tableWidget.setItem(row, 4, QTableWidgetItem(it['name']))
-                    row += 1
-                elif ORDER == 'EACH_DAY':
-                    if it['start_date'] == str(date):
-                        print(it['task_id'], it['active_list'], it['start_date'], it['limit_date'], it['name'], '\n')
-                        widgets.tableWidget.setItem(row, 0, QTableWidgetItem(it['active_list']))
-                        widgets.tableWidget.setItem(row, 1, QTableWidgetItem(it['start_date']))
-                        widgets.tableWidget.setItem(row, 2, QTableWidgetItem(it['limit_date']))
-                        widgets.tableWidget.setItem(row, 3, QTableWidgetItem(it['name']))
-                        row += 1
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
