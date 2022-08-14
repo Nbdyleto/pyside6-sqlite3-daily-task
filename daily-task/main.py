@@ -43,6 +43,7 @@ class Window(QWidget):
 
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
 
+
     def updateTaskList(self, date):
         self.tasksListWidget.clear()
 
