@@ -23,21 +23,8 @@ class Window(QWidget):
         widgets.tableWidget.setRowCount(15)
         widgets.tableWidget.setItem(0, 0, QTableWidgetItem('test'))
 
-        """
-        self.create_table()
-        db = sqlite3.connect("daily-task/data.db")
-        cursor = db.cursor()
-
-        query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
-        values = ('a', 'NO', '10')
-        cursor.execute(query_insert, values)
-
-        query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
-        values = ('b', 'NO', '10')
-        cursor.execute(query_insert, values)
-        db.commit()
-        db.close()
-        """
+        #self.create_table()
+        
         
         self.calendar_date_changed()
 
@@ -117,16 +104,19 @@ class Window(QWidget):
 
         if self.existent_in_db:
             # existent in db, so, update old data.
-            print(f'task_name: {task_name} EXISTENT, UPDATING...')
+            #print(f'task_name: {task_name} EXISTENT, UPDATING...')
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
-            print(query_update)
             cursor.execute(query_update)
+            db.commit()
+            print(query_update)
+            print(cursor.execute("SELECT * from tasks").fetchall())
             self.existent_in_db = None
             
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
-            print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
+            #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
             query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
+            print(query_insert)
             new_row_data = (new_value, "NO", date,)
             cursor.execute(query_insert, new_row_data)
             self.existent_in_db = True
@@ -135,13 +125,14 @@ class Window(QWidget):
             self.load_data_in_table(str(date))
         
 
-    def is_existent_in_db(self, row):
+    def is_existent_in_db(self, row, col):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
         query = 'SELECT task_name FROM tasks WHERE task_name = ?'
         try:
             self.selected_task = widgets.tableWidget.item(row, 0).text() # task name.
-            print(self.selected_task)
+            self.selected_task_data = widgets.tableWidget.item(row, col).text()
+            #print(self.selected_task)
             cursor.execute(query, [self.selected_task])
             print(f'task_name: {self.selected_task} EXISTENT!')
             self.existent_in_db = True
