@@ -121,6 +121,7 @@ class Window(QWidget):
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
             print(query_update)
             cursor.execute(query_update)
+            self.existent_in_db = None
             
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
