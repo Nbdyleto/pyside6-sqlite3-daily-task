@@ -120,7 +120,6 @@ class Window(QWidget):
             print(f'task_name: {task_name} EXISTENT, UPDATING...')
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
             print(query_update)
-            #new_row_data = (act_field, new_value, task_name,)
             cursor.execute(query_update)
             
         if self.existent_in_db == False: 
