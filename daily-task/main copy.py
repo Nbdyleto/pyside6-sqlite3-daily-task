@@ -43,6 +43,7 @@ class Window(QWidget):
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
         self.selected_task = None
+        self.existent_in_db = False
         widgets.tableWidget.cellClicked.connect(self.is_existent_in_db)
         widgets.tableWidget.itemChanged.connect(self.update_db)
 
@@ -129,12 +130,10 @@ class Window(QWidget):
             new_row_data = (new_value, "NO", date,)
             cursor.execute(query_insert, new_row_data)
             self.existent_in_db = True
-            #self.update_table_widget(str(date))
-
-            
+            db.commit()
+            db.close()
+            self.load_data_in_table(str(date))
         
-        db.commit()
-        db.close()
 
     def is_existent_in_db(self, row):
         db = sqlite3.connect('daily-task/data.db')
