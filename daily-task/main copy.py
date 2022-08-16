@@ -24,7 +24,7 @@ class Window(QWidget):
         widgets.tableWidget.setRowCount(15)
         widgets.tableWidget.setItem(0, 0, QTableWidgetItem('test'))
 
-        """
+        
         self.create_table()
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
@@ -37,7 +37,8 @@ class Window(QWidget):
         values = ('b', 'NO', '10')
         cursor.execute(query_insert, values)
         db.commit()
-        """
+        db.close()
+        
 
         self.calendar_date_changed()
 
@@ -69,6 +70,7 @@ class Window(QWidget):
         cursor = db.cursor()
 
         results = cursor.execute("SELECT * from tasks").fetchall()
+        db.close()
         print(results)
         try:
             tablerow = 0
@@ -125,9 +127,11 @@ class Window(QWidget):
             query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
             new_row_data = (task_name, "NO", date,)
             cursor.execute(query_insert, new_row_data)
+            self.existent_in_db = True
         
         db.commit()
-        #self.update_table_widget(str(date))
+        db.close()
+        self.update_table_widget(str(date))
     
     def is_existent_in_db(self, row):
         db = sqlite3.connect('daily-task/data.db')
