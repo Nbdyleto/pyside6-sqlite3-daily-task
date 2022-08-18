@@ -1,3 +1,4 @@
+from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint
 from PySide6.QtGui import QBrush, QColor
@@ -25,8 +26,7 @@ class Window(QWidget):
 
         #self.create_table()
         
-        
-        self.calendar_date_changed()
+        self.load_data_in_table('')
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
         self.selected_task = None
@@ -46,6 +46,7 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
+        self.existent_in_db = None
         self.load_data_in_table(str(date_selected))
 
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
@@ -106,20 +107,19 @@ class Window(QWidget):
             # existent in db, so, update old data.
             #print(f'task_name: {task_name} EXISTENT, UPDATING...')
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
+            print(query_update, self.existent_in_db)
             cursor.execute(query_update)
             db.commit()
-            print(query_update)
-            print(cursor.execute("SELECT * from tasks").fetchall())
             self.existent_in_db = None
             
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
             #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
             query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
-            print(query_insert)
+            print(query_insert, self.existent_in_db)
             new_row_data = (new_value, "NO", date,)
             cursor.execute(query_insert, new_row_data)
-            self.existent_in_db = True
+            self.existent_in_db = None
             db.commit()
             db.close()
             self.load_data_in_table(str(date))
