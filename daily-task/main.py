@@ -1,4 +1,4 @@
-from pickle import TRUE
+from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint
 from PySide6.QtGui import QBrush, QColor
@@ -20,18 +20,17 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(0,100)
         widgets.tableWidget.setColumnWidth(1,100)
         widgets.tableWidget.setColumnWidth(2,100)
-        widgets.tableWidget.setColumnWidth(3,150)
         widgets.tableWidget.setRowCount(15)
-        widgets.tableWidget.setItem(0, 0, QTableWidgetItem('test'))
 
-        self.create_table()
-
-        self.calendar_date_changed()
+        #self.create_table()
+        
+        self.load_data_in_table('')
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
-
+        self.selected_task = None
+        self.existent_in_db = False
         widgets.tableWidget.cellClicked.connect(self.is_existent_in_db)
-        widgets.tableWidget.itemChanged.connect(self.add_or_update_in_db)
+        widgets.tableWidget.itemChanged.connect(self.update_db)
 
     def event_test(self, row, col):
         print(row, col)
@@ -45,8 +44,30 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
         date_selected = widgets.calendarWidget.selectedDate().toPython()
         print(f'date: {date_selected}')
-        self.update_table_widget(date_selected)
+        self.existent_in_db = None
+        self.load_data_in_table(str(date_selected))
 
+    # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
+
+    def load_data_in_table(self, date):
+        widgets.tableWidget.clear()
+
+        db = sqlite3.connect("daily-task/data.db")
+        cursor = db.cursor()
+
+        results = cursor.execute("SELECT * from tasks").fetchall()
+        db.close()
+        print(results)
+        try:
+            tablerow = 0
+            for row in results:
+                widgets.tableWidget.setItem(tablerow, 0, QTableWidgetItem(row[0]))
+                widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))
+                widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))
+                tablerow += 1
+        except Exception:
+            print('Não funfou.')
+    
     def create_table(self):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
@@ -62,32 +83,16 @@ class Window(QWidget):
         cursor.execute(table)
         print('table is ready!')
 
-    # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
+    def saveChanges(self):
+        pass
 
-    def update_table_widget(self, date):
-        widgets.tableWidget.clear()
+    # atributtes from each task:
+    # name, topic, start_date, limit_date, checked.
 
-        db = sqlite3.connect("daily-task/data.db")
-        cursor = db.cursor()
-        
-        query = "SELECT task_name, completed FROM tasks WHERE date = ?"
-        row_date = (date,)
-
-        results = cursor.execute(query, row_date).fetchall()
-        #print(f'in date {date}... {results}')
-        try:
-            for row, result in enumerate(results):
-                widgets.tableWidget.setItem(row, 0, QTableWidgetItem(result[0]))
-                widgets.tableWidget.setItem(row, 1, QTableWidgetItem(result[1]))
-                widgets.tableWidget.setItem(row, 2, QTableWidgetItem(result[2]))
-                print(result, '\n')
-        except Exception:
-            print('Não funfou.')
-
-    def add_or_update_in_db(self, item):
+    def update_db(self, item):
         row, col = item.row(), item.column()
         new_value = item.text()
-        task_name = widgets.tableWidget.item(row, 0).text()
+        task_name = self.selected_task
         date = widgets.calendarWidget.selectedDate().toPython()
 
         db = sqlite3.connect("daily-task/data.db")
@@ -96,35 +101,43 @@ class Window(QWidget):
         field_list = ['task_name', 'completed', 'date']
         act_field = field_list[col]
 
-        if self.existent_in_db:  
-            # cell clicked is existent in db, so, update old data.
-            query_update = "UPDATE tasks SET ?=? WHERE task_name=?"
-            new_row_data = (act_field, new_value, task_name,)
-            cursor.execute(query_update, new_row_data)
-        else:   
-            # cell clicked is not existent in db, so, create new data.
+        if self.existent_in_db:
+            # existent in db, so, update old data.
+            #print(f'task_name: {task_name} EXISTENT, UPDATING...')
+            query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
+            print(query_update)
+            cursor.execute(query_update)
+            db.commit()
+            self.existent_in_db = None
+            self.load_data_in_table(str(date))
+            
+        if self.existent_in_db == False: 
+            # not existent in db, so, create new data.
+            #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
             query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
-            new_row_data = (task_name, "NO", date,)
+            print(query_insert)
+            new_row_data = (new_value, "NO", date,)
             cursor.execute(query_insert, new_row_data)
+            self.existent_in_db = None
+            db.commit()
+            db.close()
+            self.load_data_in_table(str(date))
         
-        db.commit()
-        self.update_table_widget(date)
-        #db.close()
-    
-    def is_existent_in_db(self, row):
+    def is_existent_in_db(self, row, col):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
-        query = """
-            SELECT colunm_name FROM tasks WHERE EXISTS task_name = ?
-        """
-        task_name = widgets.tableWidget.itemAt(row, 0) # task name.
-        if task_name != None:
-            print(f'task_name: {task_name} EXISTENT!')
-            cursor.execute(query, (task_name,))
+        query = 'SELECT task_name FROM tasks WHERE task_name = ?'
+        try:
+            self.selected_task = widgets.tableWidget.item(row, 0).text() # task name.
+            self.selected_task_data = widgets.tableWidget.item(row, col).text()
+            #print(self.selected_task)
+            cursor.execute(query, [self.selected_task])
+            print(f'task_name: {self.selected_task} EXISTENT!')
             self.existent_in_db = True
-        else:
-            print(f'task_name: {task_name} NOT EXISTENT!')
+        except Exception:
+            print('NOT EXISTENT!')
             self.existent_in_db = False
+        print(self.existent_in_db, '\n')
 
     #####
 

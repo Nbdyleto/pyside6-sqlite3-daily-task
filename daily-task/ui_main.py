@@ -103,6 +103,8 @@ class Ui_Form(object):
         """)
 
         self.tableWidget = QTableWidget(Form)
+        self.tableWidget.setGeometry(QRect(40, 150, 500, 320))
+        self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -110,7 +112,7 @@ class Ui_Form(object):
         #self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.horizontalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setVisible(True)
         self.tableWidget.setShowGrid(False)
 
         self.tableWidget.setSortingEnabled(False)
@@ -139,21 +141,14 @@ class Ui_Form(object):
             }
         """)
         
-        self.tableWidget.setColumnCount(5)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        __qtablewidgetitem3 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(3, __qtablewidgetitem3)
-        __qtablewidgetitem4 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
-        self.tableWidget.setObjectName(u"tableWidget")
+        self.tableWidget.setColumnCount(3)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
         #self.tableWidget.setGeometry(QRect(480, 150, 480, 301))
-        self.tableWidget.setHorizontalHeaderLabels(['a', 'b', 'c', 'd'])
-        self.tableWidget.setGeometry(QRect(40, 150, 480, 301))
 
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
@@ -170,17 +165,14 @@ class Ui_Form(object):
     # setupUi
 
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"Daily Task Planner", None))
-        ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("Form", u"Name", None))
-        ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("Form", u"Age", None))
-        ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("Form", u"Address", None))
-        ___qtablewidgetitem3 = self.tableWidget.horizontalHeaderItem(3)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("Form", u"Test", None))
-        labels = [___qtablewidgetitem.text(), ___qtablewidgetitem1.text(), ___qtablewidgetitem2.text(), ___qtablewidgetitem3.text()]
-        print(labels)
+        _translate = QCoreApplication.translate
+        Form.setWindowTitle(_translate("Form", u"Form", None))
+        self.label.setText(_translate("Form", u"Daily Task Planner", None))
+        item = self.tableWidget.horizontalHeaderItem(0)
+        item.setText(_translate("Form", u"Name"))
+        item = self.tableWidget.horizontalHeaderItem(1)
+        item.setText(_translate("Form", u"Age"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("Form", u"Address"))
     # retranslateUi
 
