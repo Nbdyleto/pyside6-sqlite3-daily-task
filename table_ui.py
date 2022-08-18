@@ -41,12 +41,6 @@ class Ui_Dialog(object):
         self.tableWidget = QTableWidget(Dialog)
         if (self.tableWidget.columnCount() < 3):
             self.tableWidget.setColumnCount(3)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setGeometry(QRect(300, 200, 701, 321))
 

@@ -21,6 +21,8 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(1,100)
         widgets.tableWidget.setColumnWidth(2,100)
         widgets.tableWidget.setRowCount(15)
+        self.columnLabels = ["Make","Model","Price"]
+        widgets.tableWidget.setHorizontalHeaderLabels(self.columnLabels)
 
         #self.create_table()
         

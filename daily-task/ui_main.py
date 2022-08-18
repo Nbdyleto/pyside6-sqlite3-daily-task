@@ -33,7 +33,7 @@ class Ui_Form(object):
             width: 75px;
             color: #f8f8f2;
             font-size: 15px;
-            icon-size: 15px, 15px;
+            icon-size: 15px;
             background-color: #44475a;
             margin-top: 1px;
         }
@@ -148,7 +148,6 @@ class Ui_Form(object):
         self.tableWidget.setHorizontalHeaderItem(1, item)
         item = QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(2, item)
-        #self.tableWidget.setGeometry(QRect(480, 150, 480, 301))
 
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
