@@ -1,7 +1,7 @@
 from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
-from PySide6.QtCore import QDate, QPoint
-from PySide6.QtGui import QBrush, QColor
+from PySide6.QtCore import QDate, QPoint, QSize
+from PySide6.QtGui import QBrush, QColor, QIcon
 from matplotlib import widgets
 from ui_main import Ui_Form
 import sys
@@ -51,11 +51,16 @@ class Window(QWidget):
         results = cursor.execute("SELECT * from tasks").fetchall()
         db.close()
         print(results)
+
+        ico = QIcon()
+        ico.addFile('cil-check', QSize(36, 36), QIcon.Normal, QIcon.On)
+
         try:
             tablerow = 0
             for row in results:
                 widgets.tableWidget.setItem(tablerow, 0, QTableWidgetItem(row[0]))
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))
+                widgets.tableWidget.item(tablerow, 1).setIcon(ico)
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))
                 tablerow += 1
         except Exception:
@@ -114,7 +119,7 @@ class Window(QWidget):
             #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
             query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
             print(query_insert)
-            new_row_data = (new_value, "NO", date,)
+            new_row_data = (new_value, "Not Started", date,)
             cursor.execute(query_insert, new_row_data)
             self.existent_in_db = None
             db.commit()
