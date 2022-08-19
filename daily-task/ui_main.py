@@ -26,7 +26,7 @@ class Ui_Form(object):
         Form.resize(950, 514)
         
         self.tableWidget = QTableWidget(Form)
-        self.tableWidget.setGeometry(QRect(40, 150, 600, 320))
+        self.tableWidget.setGeometry(QRect(40, 150, 665, 320))
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -64,7 +64,7 @@ class Ui_Form(object):
             }
         """)
         
-        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setColumnCount(5)
         item = QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
         item = QTableWidgetItem()

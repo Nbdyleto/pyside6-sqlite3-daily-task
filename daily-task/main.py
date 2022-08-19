@@ -19,7 +19,9 @@ class Window(QWidget):
 
         widgets.tableWidget.setColumnWidth(0,200)
         widgets.tableWidget.setColumnWidth(1,150)
-        widgets.tableWidget.setColumnWidth(2,150)
+        widgets.tableWidget.setColumnWidth(2,100)
+        widgets.tableWidget.setColumnWidth(3,100)
+        widgets.tableWidget.setColumnWidth(4,100)
         widgets.tableWidget.setRowCount(15)
         self.columnLabels = ["Make","Model","Price"]
         widgets.tableWidget.setHorizontalHeaderLabels(self.columnLabels)
@@ -48,6 +50,7 @@ class Window(QWidget):
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
 
+        # order by in mysql ...
         results = cursor.execute("SELECT * from tasks").fetchall()
         db.close()
         print(results)
