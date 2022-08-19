@@ -17,41 +17,32 @@ class Window(QWidget):
         global widgets
         widgets = self.ui
 
-        widgets.tableWidget.setColumnWidth(0,100)
-        widgets.tableWidget.setColumnWidth(1,100)
-        widgets.tableWidget.setColumnWidth(2,100)
+        widgets.tableWidget.setColumnWidth(0,200)
+        widgets.tableWidget.setColumnWidth(1,150)
+        widgets.tableWidget.setColumnWidth(2,150)
         widgets.tableWidget.setRowCount(15)
         self.columnLabels = ["Make","Model","Price"]
         widgets.tableWidget.setHorizontalHeaderLabels(self.columnLabels)
 
         #self.create_table()
         
-        self.load_data_in_table('')
+        self.load_data_in_table()
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
+        widgets.calendarWidget.setVisible(False)
         self.selected_task = None
         self.existent_in_db = False
+        self.selected_date = QDate.currentDate().toPython()
+        self.selected_date_cel = []
         widgets.tableWidget.cellClicked.connect(self.is_existent_in_db)
         widgets.tableWidget.itemChanged.connect(self.update_db)
-
-    def event_test(self, row, col):
-        print(row, col)
-        item = widgets.tableWidget.item(row, col)
-        print(item.text())
 
     def change_data(self, item):
         pass
 
-    def calendar_date_changed(self):
-        print('the calendar date has changed! \n')
-        date_selected = widgets.calendarWidget.selectedDate().toPython()
-        print(f'date: {date_selected}')
-        self.existent_in_db = None
-        self.load_data_in_table(str(date_selected))
-
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
 
-    def load_data_in_table(self, date):
+    def load_data_in_table(self):
         widgets.tableWidget.clear()
 
         db = sqlite3.connect("daily-task/data.db")
@@ -91,17 +82,22 @@ class Window(QWidget):
     # atributtes from each task:
     # name, topic, start_date, limit_date, checked.
 
-    def update_db(self, item):
+    def update_db(self, item, is_date_type = False):
         row, col = item.row(), item.column()
         new_value = item.text()
         task_name = self.selected_task
-        date = widgets.calendarWidget.selectedDate().toPython()
+        date = self.selected_date
+        if is_date_type:
+            new_value = date
 
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
 
         field_list = ['task_name', 'completed', 'date']
         act_field = field_list[col]
+
+        print(item.row(), item.column())
+        print(f'act_field: {act_field}, new value: {new_value}, task_name: {task_name}, existent in db? {self.existent_in_db}')
 
         if self.existent_in_db:
             # existent in db, so, update old data.
@@ -111,7 +107,7 @@ class Window(QWidget):
             cursor.execute(query_update)
             db.commit()
             self.existent_in_db = None
-            self.load_data_in_table(str(date))
+            self.load_data_in_table()
             
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
@@ -123,16 +119,16 @@ class Window(QWidget):
             self.existent_in_db = None
             db.commit()
             db.close()
-            self.load_data_in_table(str(date))
-        
+            self.load_data_in_table()
+
     def is_existent_in_db(self, row, col):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
         query = 'SELECT task_name FROM tasks WHERE task_name = ?'
+
         try:
             self.selected_task = widgets.tableWidget.item(row, 0).text() # task name.
             self.selected_task_data = widgets.tableWidget.item(row, col).text()
-            #print(self.selected_task)
             cursor.execute(query, [self.selected_task])
             print(f'task_name: {self.selected_task} EXISTENT!')
             self.existent_in_db = True
@@ -140,6 +136,33 @@ class Window(QWidget):
             print('NOT EXISTENT!')
             self.existent_in_db = False
         print(self.existent_in_db, '\n')
+
+        if col == 2: # date
+            self.show_calendar(row, col)
+        else:
+            self.hide_calendar()
+
+    def show_calendar(self, row, col):
+        widgets.calendarWidget.setVisible(True)
+        X_VALUE, Y_VALUE = 230, 205
+        widgets.calendarWidget.move(X_VALUE, Y_VALUE+(row*10))
+        self.selected_date_cel = (row, col)
+        print(f'show calendar... {self.selected_date_cel}')
+
+    def hide_calendar(self):
+        widgets.calendarWidget.setVisible(False)
+
+    def reset_calendar_date(self):
+        self.selected_date = QDate.currentDate().toPython()
+
+    def calendar_date_changed(self):
+        self.hide_calendar()
+        print('the calendar date has changed! \n')
+        self.selected_date = widgets.calendarWidget.selectedDate().toPython()
+        print(f'new date: {self.selected_date}')
+        item = widgets.tableWidget.item(self.selected_date_cel[0], self.selected_date_cel[1])
+        self.update_db(item, is_date_type=True)
+        self.reset_calendar_date()
 
     #####
 

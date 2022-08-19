@@ -24,9 +24,57 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(950, 514)
+        
+        self.tableWidget = QTableWidget(Form)
+        self.tableWidget.setGeometry(QRect(40, 150, 600, 320))
+        self.tableWidget.setObjectName(u"tableWidget")
+        self.tableWidget.setFocusPolicy(Qt.NoFocus)
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        #self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setVisible(True)
+        self.tableWidget.setShowGrid(False)
+
+        self.tableWidget.setSortingEnabled(True)
+
+        self.tableWidget.setStyleSheet("""
+            QTableWidget {
+                background-color: #282a36; 
+                border-radius: 0px;
+            }
+
+            QTableWidget::item {
+                color: #f8f8f2;                    
+                background-color: #44475a;
+                margin-top: 5px;          
+                border-radius: 0px;
+                padding-left: 2px;
+            }
+
+            QTableWidget::item:selected {
+                background-color: #6272a4;
+                selection-color : #000000;
+            }
+            QHeaderView::section {
+                background-color:#6272a4;
+                selection-color: #000000;
+            }
+        """)
+        
+        self.tableWidget.setColumnCount(3)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+
         self.calendarWidget = QCalendarWidget(Form)
         self.calendarWidget.setObjectName(u"calendarWidget")
-        self.calendarWidget.setGeometry(QRect(550, 150, 340, 240))
+        self.calendarWidget.setGeometry(QRect(230, 205, 340, 240))
         self.calendarWidget.setStyleSheet("""
         QCalendarWidget QToolButton {
             height: 30px;
@@ -101,53 +149,6 @@ class Ui_Form(object):
         }
 
         """)
-
-        self.tableWidget = QTableWidget(Form)
-        self.tableWidget.setGeometry(QRect(40, 150, 500, 320))
-        self.tableWidget.setObjectName(u"tableWidget")
-        self.tableWidget.setFocusPolicy(Qt.NoFocus)
-        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        #self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        #self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
-        self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.horizontalHeader().setVisible(True)
-        self.tableWidget.setShowGrid(False)
-
-        self.tableWidget.setSortingEnabled(False)
-
-        self.tableWidget.setStyleSheet("""
-            QTableWidget {
-                background-color: #282a36; 
-                border-radius: 0px;
-            }
-
-            QTableWidget::item {
-                color: #f8f8f2;                    
-                background-color: #44475a;
-                margin-top: 5px;          
-                border-radius: 0px;
-                padding-left: 2px;
-            }
-
-            QTableWidget::item:selected {
-                background-color: #6272a4;
-                selection-color : #000000;
-            }
-            QHeaderView::section {
-                background-color:#6272a4;
-                selection-color: #000000;
-            }
-        """)
-        
-        self.tableWidget.setColumnCount(3)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, item)
 
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
