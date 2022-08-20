@@ -1,8 +1,6 @@
-from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint, QSize
 from PySide6.QtGui import QBrush, QColor, QIcon
-from matplotlib import widgets
 from ui_main import Ui_Form
 import sys
 import sqlite3
@@ -23,9 +21,6 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(3,100)
         widgets.tableWidget.setColumnWidth(4,100)
         widgets.tableWidget.setRowCount(15)
-        self.columnLabels = ["Make","Model","Price"]
-        widgets.tableWidget.setHorizontalHeaderLabels(self.columnLabels)
-
         #self.create_table()
         
         self.load_data_in_table()
@@ -34,10 +29,12 @@ class Window(QWidget):
         widgets.calendarWidget.setVisible(False)
         self.selected_task = None
         self.existent_in_db = False
-        self.selected_date = QDate.currentDate().toPython()
-        self.selected_date_cel = []
+        self.slc_start_date = QDate.currentDate().toPython()
+        self.slc_end_date = QDate.currentDate().toPython()
+        self.slc_date_cel = []
         widgets.tableWidget.cellClicked.connect(self.is_existent_in_db)
         widgets.tableWidget.itemChanged.connect(self.update_db)
+        self.slc_row, self.slc_col = None, None
 
     def change_data(self, item):
         pass
@@ -55,16 +52,14 @@ class Window(QWidget):
         db.close()
         print(results)
 
-        ico = QIcon()
-        ico.addFile('cil-check', QSize(36, 36), QIcon.Normal, QIcon.On)
-
         try:
             tablerow = 0
             for row in results:
                 widgets.tableWidget.setItem(tablerow, 0, QTableWidgetItem(row[0]))
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))
-                widgets.tableWidget.item(tablerow, 1).setIcon(ico)
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))
+                widgets.tableWidget.setItem(tablerow, 3, QTableWidgetItem(row[3]))
+                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(str(row[4])))
                 tablerow += 1
         except Exception:
             print('Não funfou.')
@@ -73,16 +68,35 @@ class Window(QWidget):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
 
-        cursor.execute('DROP TABLE IF EXISTS TASKS')
-
-        table = """ CREATE TABLE TASKS (
-                    task_name VARCHAR(255) NOT NULL, 
-                    completed VARCHAR(255) NOT NULL,
-                    date VARCHAR(15) NOT NULL
+        # Child Table
+        cursor.execute('DROP TABLE IF EXISTS tasks')
+        tbl_tasks = """ CREATE TABLE tasks (
+            task_name VARCHAR(255) NOT NULL, 
+            completed VARCHAR(255) NOT NULL,
+            start_date VARCHAR(15) NOT NULL,
+	        end_date VARCHAR(10) NOT NULL,	
+            topic_id INTEGUER NOT NULL,
+            FOREIGN KEY (topic_id)
+            	REFERENCES topics (topic_id)
+            	ON DELETE SET NULL
         );"""
+        cursor.execute(tbl_tasks)
+        print('table tasks is ready!')
         
-        cursor.execute(table)
-        print('table is ready!')
+        # Parent Table:
+        cursor.execute('DROP TABLE IF EXISTS topics')
+        tbl_topics = """ CREATE TABLE topics (
+            topic_id INTEGUER PRIMARY KEY,
+            topic_name VARCHAR(255) NOT NULL
+        );"""
+        cursor.execute(tbl_topics)
+        print('table topics is ready!')
+
+        # populate topics table
+        
+        poptbl = """INSERT INTO topics (topic_name) VALUES ('Math');"""
+        cursor.execute(poptbl)
+        print('table topics populate with 2 instances!')
 
     def saveChanges(self):
         pass
@@ -94,14 +108,20 @@ class Window(QWidget):
         row, col = item.row(), item.column()
         new_value = item.text()
         task_name = self.selected_task
-        date = self.selected_date
+        start_date = self.slc_start_date
+        end_date = self.slc_end_date
         if is_date_type:
-            new_value = date
+            if self.slc_col == 2:
+                new_value = start_date
+            elif self.slc_col == 3:
+                new_value = end_date
+            else:
+                self.slc_start_date, self.slc_end_date = None, None
 
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
 
-        field_list = ['task_name', 'completed', 'date']
+        field_list = ['task_name', 'completed', 'start_date', 'end_date', 'topic_id']
         act_field = field_list[col]
 
         print(item.row(), item.column())
@@ -120,9 +140,9 @@ class Window(QWidget):
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
             #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
-            query_insert = "INSERT INTO tasks(task_name, completed, date) VALUES (?,?,?)"
+            query_insert = "INSERT INTO tasks(task_name, completed, start_date, end_date, topic_id) VALUES (?,?,?,?,?)"
             print(query_insert)
-            new_row_data = (new_value, "Not Started", date,)
+            new_row_data = (new_value, "Not Started", start_date, end_date, 0)
             cursor.execute(query_insert, new_row_data)
             self.existent_in_db = None
             db.commit()
@@ -130,6 +150,7 @@ class Window(QWidget):
             self.load_data_in_table()
 
     def is_existent_in_db(self, row, col):
+        
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
         query = 'SELECT task_name FROM tasks WHERE task_name = ?'
@@ -145,30 +166,41 @@ class Window(QWidget):
             self.existent_in_db = False
         print(self.existent_in_db, '\n')
 
-        if col == 2: # date
-            self.show_calendar(row, col)
+        self.slc_row, self.slc_col = row, col
+
+        if col == 2 or col == 3: # start_date or end_date
+            self.show_calendar()
         else:
             self.hide_calendar()
 
-    def show_calendar(self, row, col):
+    def show_calendar(self):
         widgets.calendarWidget.setVisible(True)
         X_VALUE, Y_VALUE = 230, 205
-        widgets.calendarWidget.move(X_VALUE, Y_VALUE+(row*10))
-        self.selected_date_cel = (row, col)
-        print(f'show calendar... {self.selected_date_cel}')
+        if self.slc_col == 3:
+            X_VALUE = 250
+        widgets.calendarWidget.move(X_VALUE, Y_VALUE+(self.slc_row*30))
+        print(f'show calendar... {self.slc_row, self.slc_col}')
 
     def hide_calendar(self):
         widgets.calendarWidget.setVisible(False)
 
     def reset_calendar_date(self):
-        self.selected_date = QDate.currentDate().toPython()
+        self.slc_start_date = QDate.currentDate().toPython()
+        self.slc_end_date = QDate.currentDate().toPython()
 
     def calendar_date_changed(self):
         self.hide_calendar()
         print('the calendar date has changed! \n')
-        self.selected_date = widgets.calendarWidget.selectedDate().toPython()
-        print(f'new date: {self.selected_date}')
-        item = widgets.tableWidget.item(self.selected_date_cel[0], self.selected_date_cel[1])
+
+        if self.slc_col == 2:  #start_date cell
+            self.slc_start_date = widgets.calendarWidget.selectedDate().toPython()
+        elif self.slc_col == 3: # end_date cell
+            self.slc_end_date = widgets.calendarWidget.selectedDate().toPython()
+        else:
+            print('None')
+
+        print(f'new date: {self.slc_start_date}')
+        item = widgets.tableWidget.item(self.slc_row, self.slc_col)
         self.update_db(item, is_date_type=True)
         self.reset_calendar_date()
 
