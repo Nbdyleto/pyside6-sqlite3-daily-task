@@ -74,7 +74,7 @@ class Window(QWidget):
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))
                 widgets.tableWidget.setItem(tablerow, 3, QTableWidgetItem(row[3]))
-                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(row[4]))
+                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(self.test[row[4]][1])) #row[4] = topic_id
                 tablerow += 1
         except Exception:
             print('Não funfou.')
@@ -94,7 +94,7 @@ class Window(QWidget):
             topic_id INTEGUER NOT NULL,
             FOREIGN KEY (topic_id)
             	REFERENCES topics (topic_id)
-            	ON DELETE SET NULL
+
         );"""
         cursor.execute(tbl_tasks)
         print('table tasks is ready!')
@@ -111,9 +111,16 @@ class Window(QWidget):
 
         # populate topics table
         
-        poptbl = """INSERT INTO topics (topic_name) VALUES ('Math');"""
+        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (0, 'Math');"""
         cursor.execute(poptbl)
-        print('table topics populate with 1 instance!')
+
+        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (1, 'Geo');"""
+        cursor.execute(poptbl)
+
+        print('table topics populate with 2 instances!')
+
+        self.test = cursor.execute("SELECT * FROM topics").fetchall()
+        print(self.test)
 
     def saveChanges(self):
         pass
@@ -157,7 +164,7 @@ class Window(QWidget):
             # not existent in db, so, create new data.
             query_insert = f"INSERT INTO tasks(task_name, completed, start_date, end_date, topic_id) VALUES (?,?,?,?,?)"
             print(query_insert)
-            new_row_data = (new_value, "Not Started", start_date, end_date, 0)
+            new_row_data = (new_value, "Not Started", start_date, end_date, 1)
             cursor.execute(query_insert, new_row_data)
             self.existent_in_db = None
             db.commit()
