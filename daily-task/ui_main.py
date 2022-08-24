@@ -26,7 +26,7 @@ class Ui_Form(object):
         Form.resize(950, 514)
         
         self.tableWidget = QTableWidget(Form)
-        self.tableWidget.setGeometry(QRect(40, 150, 665, 320))
+        self.tableWidget.setGeometry(QRect(40, 150, 770, 320))
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)

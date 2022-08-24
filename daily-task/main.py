@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QApplication, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
+from pickle import NONE
+from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint, QSize
 from PySide6.QtGui import QBrush, QColor, QIcon
 from ui_main import Ui_Form
@@ -17,11 +18,19 @@ class Window(QWidget):
 
         widgets.tableWidget.setColumnWidth(0,200)
         widgets.tableWidget.setColumnWidth(1,150)
-        widgets.tableWidget.setColumnWidth(2,100)
-        widgets.tableWidget.setColumnWidth(3,100)
+        widgets.tableWidget.setColumnWidth(2,150)
+        widgets.tableWidget.setColumnWidth(3,150)
         widgets.tableWidget.setColumnWidth(4,100)
-        widgets.tableWidget.setRowCount(15)
-        #self.create_table()
+
+        @property
+        def row_count(self):
+            return getattr(self, '_row_count', 1)
+        
+        @row_count.setter
+        def row_count(self, val):
+            self._row_count = val
+
+        self.create_table()
         
         self.load_data_in_table()
 
@@ -43,13 +52,19 @@ class Window(QWidget):
 
     def load_data_in_table(self):
         widgets.tableWidget.clear()
-
+        
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
+        
+        count = cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
 
-        # order by in mysql ...
+        self.row_count = count+1
+        widgets.tableWidget.setRowCount(self.row_count)
+
+        # how order by in mysql?...
+
         results = cursor.execute("SELECT * from tasks").fetchall()
-        db.close()
+        
         print(results)
 
         try:
@@ -59,10 +74,11 @@ class Window(QWidget):
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))
                 widgets.tableWidget.setItem(tablerow, 3, QTableWidgetItem(row[3]))
-                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(str(row[4])))
+                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(row[4]))
                 tablerow += 1
         except Exception:
             print('Não funfou.')
+        db.close()
     
     def create_table(self):
         db = sqlite3.connect('daily-task/data.db')
@@ -90,13 +106,14 @@ class Window(QWidget):
             topic_name VARCHAR(255) NOT NULL
         );"""
         cursor.execute(tbl_topics)
+
         print('table topics is ready!')
 
         # populate topics table
         
         poptbl = """INSERT INTO topics (topic_name) VALUES ('Math');"""
         cursor.execute(poptbl)
-        print('table topics populate with 2 instances!')
+        print('table topics populate with 1 instance!')
 
     def saveChanges(self):
         pass
@@ -124,12 +141,11 @@ class Window(QWidget):
         field_list = ['task_name', 'completed', 'start_date', 'end_date', 'topic_id']
         act_field = field_list[col]
 
-        print(item.row(), item.column())
-        print(f'act_field: {act_field}, new value: {new_value}, task_name: {task_name}, existent in db? {self.existent_in_db}')
+        #print(item.row(), item.column())
+        print(f'actual field: {item.text()}')
 
         if self.existent_in_db:
             # existent in db, so, update old data.
-            #print(f'task_name: {task_name} EXISTENT, UPDATING...')
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
             print(query_update)
             cursor.execute(query_update)
@@ -139,8 +155,7 @@ class Window(QWidget):
             
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
-            #print(f'task_name: {task_name} NOT EXISTENT, CREATING...')
-            query_insert = "INSERT INTO tasks(task_name, completed, start_date, end_date, topic_id) VALUES (?,?,?,?,?)"
+            query_insert = f"INSERT INTO tasks(task_name, completed, start_date, end_date, topic_id) VALUES (?,?,?,?,?)"
             print(query_insert)
             new_row_data = (new_value, "Not Started", start_date, end_date, 0)
             cursor.execute(query_insert, new_row_data)
@@ -168,8 +183,11 @@ class Window(QWidget):
 
         self.slc_row, self.slc_col = row, col
 
-        if col == 2 or col == 3: # start_date or end_date
+        if ((col == 2 or col == 3) and self.existent_in_db == True): # start_date or end_date
             self.show_calendar()
+        elif col == 4:
+            self.show_topics()
+            print('show_topics')
         else:
             self.hide_calendar()
 
@@ -187,6 +205,7 @@ class Window(QWidget):
     def reset_calendar_date(self):
         self.slc_start_date = QDate.currentDate().toPython()
         self.slc_end_date = QDate.currentDate().toPython()
+        print('reseting...')
 
     def calendar_date_changed(self):
         self.hide_calendar()
