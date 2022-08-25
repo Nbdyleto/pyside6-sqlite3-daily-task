@@ -42,12 +42,22 @@ class Ui_Form(object):
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         #self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         #self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.horizontalHeader().setVisible(True)
         self.tableWidget.setShowGrid(False)
-
         self.tableWidget.setSortingEnabled(False)
+
+        self.tableWidget.setColumnCount(5)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
 
         self.tableWidget.setStyleSheet("""
             QTableWidget {
@@ -72,22 +82,10 @@ class Ui_Form(object):
                 selection-color: #000000;
             }
         """)
-        
-        self.tableWidget.setColumnCount(5)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(3, item)
-        item = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(4, item)
 
         self.calendarWidget = QCalendarWidget(Form)
         self.calendarWidget.setObjectName(u"calendarWidget")
-        self.calendarWidget.setGeometry(QRect(230, 205, 340, 240))
+        self.calendarWidget.setGeometry(QRect(230, 205, 340, 320))
         self.calendarWidget.setVisible(False)
         self.calendarWidget.setStyleSheet("""
         QCalendarWidget QToolButton {
@@ -174,13 +172,37 @@ class Ui_Form(object):
         self.label.setAlignment(Qt.AlignCenter)
 
         self.tblTopics = QTableWidget(Form)
-        self.tblTopics.setGeometry(QRect(690, 200, 113, 100))
+        self.tblTopics.setGeometry(QRect(690, 171, 100, 190))
         self.tblTopics.setObjectName(u'tblTopics')
         self.tblTopics.setVisible(False)
         self.tblTopics.setColumnCount(1)
         self.tblTopics.setRowCount(1)
         item = QTableWidgetItem()
         self.tblTopics.setHorizontalHeaderItem(0, item)
+        self.tblTopics.setFocusPolicy(Qt.NoFocus)
+        self.tblTopics.setSelectionBehavior(QAbstractItemView.SelectRows)
+        #self.tblTopics.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tblTopics.verticalHeader().setVisible(False)
+        self.tblTopics.horizontalHeader().setVisible(False)
+        self.tblTopics.setShowGrid(False)
+        self.tblTopics.setSortingEnabled(False)
+        self.tableWidget.setWordWrap(True)
+        self.tblTopics.setStyleSheet("""
+            QTableWidget {
+                background-color: #282a36; 
+            }
+            QTableWidget::item {
+                color: #f8f8f2;                    
+                background-color: #44475a;
+                margin-top: 5px;         
+                padding-left: 2px;
+            }
+            QHeaderView::section {
+                background-color:#6272a4;
+                selection-color: #000000;
+            }
+        """)
+        
 
         self.retranslateUi(Form)
 
