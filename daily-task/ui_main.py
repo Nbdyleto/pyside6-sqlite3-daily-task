@@ -24,6 +24,15 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(950, 514)
+
+        self.tblTopics = QTableWidget(Form)
+        self.tblTopics.setGeometry(QRect(690, 200, 113, 100))
+        self.tblTopics.setObjectName(u'tblTopics')
+        self.tblTopics.setVisible(False)
+        self.tblTopics.setColumnCount(1)
+        self.tblTopics.setRowCount(1)
+        item = QTableWidgetItem()
+        self.tblTopics.setHorizontalHeaderItem(0, item)
         
         self.tableWidget = QTableWidget(Form)
         self.tableWidget.setGeometry(QRect(40, 150, 770, 320))
@@ -38,7 +47,7 @@ class Ui_Form(object):
         self.tableWidget.horizontalHeader().setVisible(True)
         self.tableWidget.setShowGrid(False)
 
-        self.tableWidget.setSortingEnabled(True)
+        self.tableWidget.setSortingEnabled(False)
 
         self.tableWidget.setStyleSheet("""
             QTableWidget {
@@ -71,10 +80,15 @@ class Ui_Form(object):
         self.tableWidget.setHorizontalHeaderItem(1, item)
         item = QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(2, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
 
         self.calendarWidget = QCalendarWidget(Form)
         self.calendarWidget.setObjectName(u"calendarWidget")
         self.calendarWidget.setGeometry(QRect(230, 205, 340, 240))
+        self.calendarWidget.setVisible(False)
         self.calendarWidget.setStyleSheet("""
         QCalendarWidget QToolButton {
             height: 30px;
@@ -159,6 +173,15 @@ class Ui_Form(object):
 "border-radius:8px;")
         self.label.setAlignment(Qt.AlignCenter)
 
+        self.tblTopics = QTableWidget(Form)
+        self.tblTopics.setGeometry(QRect(690, 200, 113, 100))
+        self.tblTopics.setObjectName(u'tblTopics')
+        self.tblTopics.setVisible(False)
+        self.tblTopics.setColumnCount(1)
+        self.tblTopics.setRowCount(1)
+        item = QTableWidgetItem()
+        self.tblTopics.setHorizontalHeaderItem(0, item)
+
         self.retranslateUi(Form)
 
         QMetaObject.connectSlotsByName(Form)
@@ -169,10 +192,17 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", u"Form", None))
         self.label.setText(_translate("Form", u"Daily Task Planner", None))
         item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("Form", u"Name"))
+        item.setText(_translate("Form", u"Task Name"))
         item = self.tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("Form", u"Age"))
+        item.setText(_translate("Form", u"Status"))
         item = self.tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("Form", u"Address"))
+        item.setText(_translate("Form", u"Start Date"))
+        item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("Form", u"End Date"))
+        item = self.tableWidget.horizontalHeaderItem(4)
+        item.setText(_translate("Form", u"Topic"))
+        
+        item = self.tblTopics.horizontalHeaderItem(0)
+        item.setText(_translate("Form", u"topic_name"))
     # retranslateUi
 
