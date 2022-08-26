@@ -1,7 +1,7 @@
 from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint, QSize
-from PySide6.QtGui import QBrush, QColor, QIcon
+from PySide6.QtGui import QBrush, QColor, QIcon, Qt
 from ui_main import Ui_Form
 import sys
 import sqlite3
@@ -21,15 +21,15 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(2,150)
         widgets.tableWidget.setColumnWidth(3,150)
         widgets.tableWidget.setColumnWidth(4,100)
-        #self.create_table()
+        self.create_table()
         
         self.load_data_in_table()
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
         self.selected_task = None
         self.existent_in_db = False
-        self.slc_start_date = QDate.currentDate().toPython()
-        self.slc_end_date = QDate.currentDate().toPython()
+        self.slc_start_date = QDate.currentDate().toString(Qt.RFC2822Date)
+        self.slc_end_date = QDate.currentDate().toString(Qt.RFC2822Date)
         self.slc_date_cel = []
         self.slc_topic_index = 0
 
@@ -39,6 +39,8 @@ class Window(QWidget):
         widgets.tblTopics.cellClicked.connect(self.select_topic)
 
         self.slc_row, self.slc_col = None, None
+
+        self.colors_list = ['#44475a', '#705D8C', '#BB6BBF', '#A366FF', '#7666FF', '#8C80FF']
 
     @property
     def row_count(self):
@@ -75,8 +77,6 @@ class Window(QWidget):
 
         self.topics = cursor.execute("SELECT * FROM topics").fetchall()
         print(self.topics)
-
-        #print(self.topics)
 
         try:
             tablerow = 0
@@ -140,11 +140,9 @@ class Window(QWidget):
         cursor.execute(poptbl)
         db.commit()
 
-        print('table topics populate with 2 instances!')
+        print('table topics populate with 4 instances!')
         
-
         self.topics = cursor.execute("SELECT * FROM topics").fetchall()
-        print(self.topics)
 
     def saveChanges(self):
         pass
@@ -243,8 +241,8 @@ class Window(QWidget):
         widgets.calendarWidget.setVisible(False)
 
     def reset_calendar_date(self):
-        self.slc_start_date = QDate.currentDate().toPython()
-        self.slc_end_date = QDate.currentDate().toPython()
+        self.slc_start_date = QDate.currentDate().toString(Qt.RFC2822Date)
+        self.slc_end_date = QDate.currentDate().toString(Qt.RFC2822Date)
         print('reseting...')
 
     def calendar_date_changed(self):
@@ -252,9 +250,9 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
 
         if self.slc_col == 2:  #start_date cell
-            self.slc_start_date = widgets.calendarWidget.selectedDate().toPython()
+            self.slc_start_date = widgets.calendarWidget.selectedDate().toString(Qt.RFC2822Date)
         elif self.slc_col == 3: # end_date cell
-            self.slc_end_date = widgets.calendarWidget.selectedDate().toPython()
+            self.slc_end_date = widgets.calendarWidget.selectedDate().toString(Qt.RFC2822Date)
         else:
             print('None')
 
@@ -274,6 +272,9 @@ class Window(QWidget):
     
     def load_topics(self):
         tablerow = 0
+        widgets.tblTopics.setItem(tablerow, 0, QTableWidgetItem())
+        widgets.tblTopics.item(tablerow, 0).setBackground(QColor(self.colors_list[0]))
+
         widgets.tblTopics.setRowCount(len(self.topics)+1)
         print(self.topics)
         for row in self.topics:
