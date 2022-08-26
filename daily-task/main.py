@@ -48,7 +48,6 @@ class Window(QWidget):
     def row_count(self, val):
         self._row_count = val
 
-    """
     @property
     def topics(self):
         return getattr(self, '_topics', '')
@@ -56,30 +55,28 @@ class Window(QWidget):
     @topics.setter
     def topics(self, values):
         self._topics = values
-    """
 
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
 
     def load_data_in_table(self):
         widgets.tableWidget.clearContents()
 
-        
         db = sqlite3.connect("daily-task/data.db")
         cursor = db.cursor()
-        
-        count = cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
-        
-        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
-        print(self.topics)
 
+        count = cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
         self.row_count = count+1
         widgets.tableWidget.setRowCount(self.row_count)
 
         # how order by in mysql?...
 
-        results = cursor.execute("SELECT * from tasks").fetchall()
-        
+        results = cursor.execute("SELECT * FROM tasks").fetchall()
         print(results)
+
+        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
+        print(self.topics)
+
+        #print(self.topics)
 
         try:
             tablerow = 0
@@ -88,13 +85,14 @@ class Window(QWidget):
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))  #row[1] = status
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))  #row[2] = start_date
                 widgets.tableWidget.setItem(tablerow, 3, QTableWidgetItem(row[3]))  #row[3] = end_date
-                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(str(row[4]))) #row[4] = topic_id
+                widgets.tableWidget.setItem(tablerow, 4, QTableWidgetItem(self.topics[row[4]][1])) #row[4] = topic_id
                 tablerow += 1
         except Exception:
             print('Não funfou.')
         db.close()
+
         #widgets.tableWidget.setRowHeight(0, 100)
-    
+
     def create_table(self):
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
@@ -128,17 +126,22 @@ class Window(QWidget):
         
         poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (0, '');"""
         cursor.execute(poptbl)
+        db.commit()
 
         poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (1, 'Geo');"""
         cursor.execute(poptbl)
+        db.commit()
 
         poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (2, 'Math');"""
         cursor.execute(poptbl)
-        
+        db.commit()
+
         poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (3, 'Chemistry');"""
         cursor.execute(poptbl)
+        db.commit()
 
         print('table topics populate with 2 instances!')
+        
 
         self.topics = cursor.execute("SELECT * FROM topics").fetchall()
         print(self.topics)
@@ -272,7 +275,9 @@ class Window(QWidget):
     def load_topics(self):
         tablerow = 0
         widgets.tblTopics.setRowCount(len(self.topics)+1)
+        print(self.topics)
         for row in self.topics:
+            print(row)
             widgets.tblTopics.setItem(tablerow, 0, QTableWidgetItem(row[1]))
             tablerow += 1
     

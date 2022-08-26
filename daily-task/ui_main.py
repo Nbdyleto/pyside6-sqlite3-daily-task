@@ -85,7 +85,7 @@ class Ui_Form(object):
 
         self.calendarWidget = QCalendarWidget(Form)
         self.calendarWidget.setObjectName(u"calendarWidget")
-        self.calendarWidget.setGeometry(QRect(230, 205, 340, 320))
+        self.calendarWidget.setGeometry(QRect(200, 205, 310, 220))
         self.calendarWidget.setVisible(False)
         self.calendarWidget.setStyleSheet("""
         QCalendarWidget QToolButton {
