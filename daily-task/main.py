@@ -21,15 +21,15 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(2,150)
         widgets.tableWidget.setColumnWidth(3,150)
         widgets.tableWidget.setColumnWidth(4,100)
-        self.create_table()
+        #self.create_table()
         
         self.load_data_in_table()
 
         widgets.calendarWidget.selectionChanged.connect(self.calendar_date_changed)
         self.selected_task = None
         self.existent_in_db = False
-        self.slc_start_date = QDate.currentDate().toString(Qt.RFC2822Date)
-        self.slc_end_date = QDate.currentDate().toString(Qt.RFC2822Date)
+        self.slc_start_date = QDate.currentDate().toString(Qt.ISODate)
+        self.slc_end_date = QDate.currentDate().toString(Qt.ISODate)
         self.slc_date_cel = []
         self.slc_topic_index = 0
 
@@ -43,12 +43,12 @@ class Window(QWidget):
         self.colors_list = ['#44475a', '#705D8C', '#BB6BBF', '#A366FF', '#7666FF', '#8C80FF']
 
     @property
-    def row_count(self):
-        return getattr(self, '_row_count', 1)
+    def row_tasks_count(self):
+        return getattr(self, '_row_tasks_count', 1)
         
-    @row_count.setter
-    def row_count(self, val):
-        self._row_count = val
+    @row_tasks_count.setter
+    def row_tasks_count(self, val):
+        self._row_tasks_count = val
 
     @property
     def topics(self):
@@ -57,6 +57,15 @@ class Window(QWidget):
     @topics.setter
     def topics(self, values):
         self._topics = values
+    
+    @property
+    def row_topics_count(self):
+        return getattr(self, '_row_topics_count', 1)
+    
+    @row_topics_count.setter
+    def row_topics_count(self, val):
+        self._row_topics_count = val
+
 
     # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
 
@@ -67,12 +76,16 @@ class Window(QWidget):
         cursor = db.cursor()
 
         count = cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
-        self.row_count = count+1
-        widgets.tableWidget.setRowCount(self.row_count)
+        self.row_tasks_count = count+1
+        widgets.tableWidget.setRowCount(self.row_tasks_count)
+
+        count = cursor.execute("SELECT COUNT(*) FROM topics").fetchone()[0]
+        self.row_topics_count = count+1
+        widgets.tblTopics.setRowCount(self.row_topics_count)
 
         # how order by in mysql?...
 
-        results = cursor.execute("SELECT * FROM tasks").fetchall()
+        results = cursor.execute("SELECT * FROM tasks ORDER BY start_date").fetchall()
         print(results)
 
         self.topics = cursor.execute("SELECT * FROM topics").fetchall()
@@ -81,6 +94,8 @@ class Window(QWidget):
         try:
             tablerow = 0
             for row in results:
+                print(str(row[2]))
+                
                 widgets.tableWidget.setItem(tablerow, 0, QTableWidgetItem(row[0]))  #row[0] = task_name
                 widgets.tableWidget.setItem(tablerow, 1, QTableWidgetItem(row[1]))  #row[1] = status
                 widgets.tableWidget.setItem(tablerow, 2, QTableWidgetItem(row[2]))  #row[2] = start_date
@@ -102,8 +117,8 @@ class Window(QWidget):
         tbl_tasks = """ CREATE TABLE tasks (
             task_name VARCHAR(255) NOT NULL, 
             status VARCHAR(255) NOT NULL,
-            start_date VARCHAR(15) NOT NULL,
-	        end_date VARCHAR(10) NOT NULL,	
+            start_date DATE NOT NULL,
+	        end_date DATE NOT NULL,	
             topic_id INTEGUER NOT NULL,
             FOREIGN KEY (topic_id)
             	REFERENCES topics (topic_id)
@@ -151,6 +166,7 @@ class Window(QWidget):
     # name, topic, start_date, limit_date, checked.
 
     def update_db(self, item, is_date_type = False):
+
         row, col = item.row(), item.column()
         new_value = item.text()
         task_name = self.selected_task
@@ -226,10 +242,12 @@ class Window(QWidget):
         else:
             self.hide_calendar()
             self.hide_topics()
+        db.close()
 
     ############# CALENDAR CELLS 'CLICKED' FUNCTIONS
 
     def show_calendar(self):
+        self.reset_calendar_date()
         widgets.calendarWidget.setVisible(True)
         X_VALUE, Y_VALUE = 230, 205
         if self.slc_col == 3:
@@ -241,8 +259,8 @@ class Window(QWidget):
         widgets.calendarWidget.setVisible(False)
 
     def reset_calendar_date(self):
-        self.slc_start_date = QDate.currentDate().toString(Qt.RFC2822Date)
-        self.slc_end_date = QDate.currentDate().toString(Qt.RFC2822Date)
+        self.slc_start_date = QDate.currentDate().toString(Qt.ISODate) # Qt.RFC2822Date
+        self.slc_end_date = QDate.currentDate().toString(Qt.ISODate)
         print('reseting...')
 
     def calendar_date_changed(self):
@@ -250,9 +268,9 @@ class Window(QWidget):
         print('the calendar date has changed! \n')
 
         if self.slc_col == 2:  #start_date cell
-            self.slc_start_date = widgets.calendarWidget.selectedDate().toString(Qt.RFC2822Date)
+            self.slc_start_date = widgets.calendarWidget.selectedDate().toString(Qt.ISODate)
         elif self.slc_col == 3: # end_date cell
-            self.slc_end_date = widgets.calendarWidget.selectedDate().toString(Qt.RFC2822Date)
+            self.slc_end_date = widgets.calendarWidget.selectedDate().toString(Qt.ISODate)
         else:
             print('None')
 
@@ -271,10 +289,9 @@ class Window(QWidget):
         print('showing topics')
     
     def load_topics(self):
+        widgets.tblTopics.clearContents()
+        print('loading topics')
         tablerow = 0
-        widgets.tblTopics.setItem(tablerow, 0, QTableWidgetItem())
-        widgets.tblTopics.item(tablerow, 0).setBackground(QColor(self.colors_list[0]))
-
         widgets.tblTopics.setRowCount(len(self.topics)+1)
         print(self.topics)
         for row in self.topics:
@@ -286,12 +303,38 @@ class Window(QWidget):
         widgets.tblTopics.setVisible(False)
     
     def select_topic(self, row, col):
-        self.slc_topic_index = row
-        self.hide_topics()
-        item = widgets.tableWidget.item(self.slc_row, self.slc_col)
-        self.update_db(item)
+        print(row, col)
+        print(self.row_topics_count)
+        if row == self.row_topics_count-1:  # last row
+            widgets.tblTopics.itemChanged.connect(self.update_topics)
+        else:
+            self.slc_topic_index = row
+            self.hide_topics()
+            item = widgets.tableWidget.item(self.slc_row, self.slc_col)
+            self.update_db(item)
 
-    # PySide6.QtCore.QDate(2022, 8, 10)
+    def update_topics(self, item):
+
+        db = sqlite3.connect('daily-task/data.db')
+        cursor = db.cursor()
+
+        widgets.tblTopics.itemChanged.disconnect() # <- not elegant, appearently 
+        print('new value:', item.text())
+        self.row_topics_count += 1
+        topic_id = self.row_topics_count
+        new_value = item.text()
+
+        query_insert = f"INSERT INTO topics (topic_id, topic_name) VALUES (?, ?)"
+        new_row_data = (topic_id, new_value)
+        cursor.execute(query_insert, new_row_data)
+        db.commit()
+
+        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
+
+        db.close()
+
+        self.load_topics()
+        # self.select_topic(item.row(), item.col())       # Study Slots to work this  
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

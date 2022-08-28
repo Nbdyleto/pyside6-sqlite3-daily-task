@@ -68,18 +68,22 @@ class Ui_Form(object):
             QTableWidget::item {
                 color: #f8f8f2;                    
                 background-color: #44475a;
-                margin-top: 5px;          
+                margin-top: 1px;          
                 border-radius: 0px;
                 padding-left: 2px;
             }
 
             QTableWidget::item:selected {
                 background-color: #6272a4;
-                selection-color : #000000;
+                selection-color : #f8f8f2;  
             }
             QHeaderView::section {
                 background-color:#6272a4;
                 selection-color: #000000;
+            }
+            QTableWidget::item:hover {
+                background-color: #6272a4;
+                color : #f8f8f2;
             }
         """)
 
@@ -189,17 +193,19 @@ class Ui_Form(object):
         self.tableWidget.setWordWrap(True)
         self.tblTopics.setStyleSheet("""
             QTableWidget {
-                background-color: #282a36; 
+                background-color:#282a36;
+                selection-color: #000000; 
             }
             QTableWidget::item {
                 color: #f8f8f2;                    
-                background-color: #44475a;
+                background-color: #282a36;
                 margin-top: 0px;         
                 padding-left: 2px;
             }
-            QHeaderView::section {
-                background-color:#6272a4;
-                selection-color: #000000;
+            QTableWidget::item:hover {
+                background-color: #6272a4;
+                
+
             }
         """)
         
