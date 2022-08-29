@@ -215,11 +215,9 @@ class Window(QWidget):
             self.load_data_in_table()
 
     def is_existent_in_db(self, row, col):
-        
         db = sqlite3.connect('daily-task/data.db')
         cursor = db.cursor()
         query = 'SELECT task_name FROM tasks WHERE task_name = ?'
-
         try:
             self.selected_task = widgets.tableWidget.item(row, 0).text() # task name.
             self.selected_task_data = widgets.tableWidget.item(row, col).text()
@@ -288,6 +286,9 @@ class Window(QWidget):
         self.load_topics()
         print('showing topics')
     
+    def hide_topics(self):
+        widgets.tblTopics.setVisible(False)
+    
     def load_topics(self):
         widgets.tblTopics.clearContents()
         print('loading topics')
@@ -299,12 +300,7 @@ class Window(QWidget):
             widgets.tblTopics.setItem(tablerow, 0, QTableWidgetItem(row[1]))
             tablerow += 1
     
-    def hide_topics(self):
-        widgets.tblTopics.setVisible(False)
-    
     def select_topic(self, row, col):
-        print(row, col)
-        print(self.row_topics_count)
         if row == self.row_topics_count-1:  # last row
             widgets.tblTopics.itemChanged.connect(self.update_topics)
         else:
@@ -314,27 +310,25 @@ class Window(QWidget):
             self.update_db(item)
 
     def update_topics(self, item):
-
-        db = sqlite3.connect('daily-task/data.db')
-        cursor = db.cursor()
-
         widgets.tblTopics.itemChanged.disconnect() # <- not elegant, appearently 
-        print('new value:', item.text())
+        
         self.row_topics_count += 1
         topic_id = self.row_topics_count
         new_value = item.text()
-
+        
+        db = sqlite3.connect('daily-task/data.db')
+        cursor = db.cursor()
         query_insert = f"INSERT INTO topics (topic_id, topic_name) VALUES (?, ?)"
         new_row_data = (topic_id, new_value)
         cursor.execute(query_insert, new_row_data)
         db.commit()
 
-        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
-
+        self.topics = cursor.execute("SELECT * FROM topics").fetchall() # update topics property
         db.close()
 
         self.load_topics()
-        # self.select_topic(item.row(), item.col())       # Study Slots to work this  
+        # self.select_topic(item.row(), item.col())   # Study 'Slots' to work with this 
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
