@@ -1,3 +1,5 @@
+from ast import With
+from sqlite3 import dbapi2
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint, QSize
 from PySide6.QtGui import QBrush, QColor, QIcon, Qt
@@ -23,7 +25,10 @@ class Window(QWidget):
         widgets.tableWidget.setColumnWidth(2,150)
         widgets.tableWidget.setColumnWidth(3,150)
         widgets.tableWidget.setColumnWidth(4,100)
-        #self.create_table()
+        
+
+        global db
+        db = DailyTaskDB()
         
         self.load_data_in_table()
 
@@ -68,30 +73,22 @@ class Window(QWidget):
     def row_topics_count(self, val):
         self._row_topics_count = val
 
-
-    # Functions based on https://github.com/codefirstio/PyQt5-Daily-Task-Planner-App/blob/main/main.py repo
-
     def load_data_in_table(self):
         widgets.tableWidget.clearContents()
 
-        db = sqlite3.connect("daily-task/data.db")
-        cursor = db.cursor()
-
-        count = cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
+        count = db.cursor.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
         self.row_tasks_count = count+1
         widgets.tableWidget.setRowCount(self.row_tasks_count)
 
-        count = cursor.execute("SELECT COUNT(*) FROM topics").fetchone()[0]
+        count = db.cursor.execute("SELECT COUNT(*) FROM topics").fetchone()[0]
         self.row_topics_count = count+1
         widgets.tblTopics.setRowCount(self.row_topics_count)
 
-        # how order by in mysql?...
-
-        results = cursor.execute("SELECT * FROM tasks ORDER BY start_date").fetchall()
-        print(results)
-
-        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
+        self.topics = db.cursor.execute("SELECT * FROM topics").fetchall()
         print(self.topics)
+
+        results = db.cursor.execute("SELECT * FROM tasks ORDER BY start_date").fetchall()
+        print(f'results:{results}')
 
         try:
             tablerow = 0
@@ -106,60 +103,8 @@ class Window(QWidget):
                 tablerow += 1
         except Exception:
             print('Não funfou.')
-        db.close()
 
         #widgets.tableWidget.setRowHeight(0, 100)
-
-    def create_table(self):
-        db = sqlite3.connect('daily-task/data.db')
-        cursor = db.cursor()
-
-        # Child Table
-        cursor.execute('DROP TABLE IF EXISTS tasks')
-        tbl_tasks = """ CREATE TABLE tasks (
-            task_name VARCHAR(255) NOT NULL, 
-            status VARCHAR(255) NOT NULL,
-            start_date DATE NOT NULL,
-	        end_date DATE NOT NULL,	
-            topic_id INTEGUER NOT NULL,
-            FOREIGN KEY (topic_id)
-            	REFERENCES topics (topic_id)
-
-        );"""
-        cursor.execute(tbl_tasks)
-        print('table tasks is ready!')
-        
-        # Parent Table:
-        cursor.execute('DROP TABLE IF EXISTS topics')
-        tbl_topics = """ CREATE TABLE topics (
-            topic_id INTEGUER PRIMARY KEY,
-            topic_name VARCHAR(255) NOT NULL
-        );"""
-        cursor.execute(tbl_topics)
-
-        print('table topics is ready!')
-
-        # populate topics table
-        
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (0, '');"""
-        cursor.execute(poptbl)
-        db.commit()
-
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (1, 'Geo');"""
-        cursor.execute(poptbl)
-        db.commit()
-
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (2, 'Math');"""
-        cursor.execute(poptbl)
-        db.commit()
-
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (3, 'Chemistry');"""
-        cursor.execute(poptbl)
-        db.commit()
-
-        print('table topics populate with 4 instances!')
-        
-        self.topics = cursor.execute("SELECT * FROM topics").fetchall()
 
     def saveChanges(self):
         pass
@@ -187,43 +132,35 @@ class Window(QWidget):
         if self.slc_col == 4:
             new_value = topic_id
 
-        db = sqlite3.connect("daily-task/data.db")
-        cursor = db.cursor()
-
         field_list = ['task_name', 'status', 'start_date', 'end_date', 'topic_id']
         act_field = field_list[col]
 
         #print(item.row(), item.column())
         print(f'actual field: {item.text()}')
 
+        print(f'new value:{new_value, self.existent_in_db}')
         if self.existent_in_db:
             # existent in db, so, update old data.
             query_update = f"UPDATE tasks SET {act_field} = '{new_value}' WHERE task_name = '{task_name}'"
             print(query_update)
-            cursor.execute(query_update)
-            db.commit()
+            db.cursor.execute(query_update)
             self.existent_in_db = None
             self.load_data_in_table()
-            
+                
         if self.existent_in_db == False: 
             # not existent in db, so, create new data.
             query_insert = f"INSERT INTO tasks(task_name, status, start_date, end_date, topic_id) VALUES (?,?,?,?,?)"
-            print(query_insert)
             new_row_data = (new_value, "Not Started", start_date, end_date, 0)
-            cursor.execute(query_insert, new_row_data)
+            db.populate(query_insert, new_row_data)
             self.existent_in_db = None
-            db.commit()
-            db.close()
             self.load_data_in_table()
 
     def is_existent_in_db(self, row, col):
-        db = sqlite3.connect('daily-task/data.db')
-        cursor = db.cursor()
         query = 'SELECT task_name FROM tasks WHERE task_name = ?'
         try:
             self.selected_task = widgets.tableWidget.item(row, 0).text() # task name.
             self.selected_task_data = widgets.tableWidget.item(row, col).text()
-            cursor.execute(query, [self.selected_task])
+            db.cursor.execute(query, [self.selected_task])
             print(f'task_name: {self.selected_task} EXISTENT!')
             self.existent_in_db = True
         except Exception:
@@ -242,7 +179,6 @@ class Window(QWidget):
         else:
             self.hide_calendar()
             self.hide_topics()
-        db.close()
 
     ############# CALENDAR CELLS 'CLICKED' FUNCTIONS
 
@@ -318,19 +254,14 @@ class Window(QWidget):
         topic_id = self.row_topics_count
         new_value = item.text()
         
-        db = sqlite3.connect('daily-task/data.db')
-        cursor = db.cursor()
         query_insert = f"INSERT INTO topics (topic_id, topic_name) VALUES (?, ?)"
         new_row_data = (topic_id, new_value)
-        cursor.execute(query_insert, new_row_data)
-        db.commit()
+        db.populate(query_insert, new_row_data)
 
-        self.topics = cursor.execute("SELECT * FROM topics").fetchall() # update topics property
-        db.close()
+        self.topics = db.cursor.execute("SELECT * FROM topics").fetchall() # update topics property
 
         self.load_topics()
         # self.select_topic(item.row(), item.col())   # Study 'Slots' to work with this 
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

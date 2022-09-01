@@ -2,6 +2,7 @@ import json
 import sqlite3
 
 #https://codereview.stackexchange.com/questions/182700/python-class-to-manage-a-table-in-sqlite
+#https://blog.rtwilson.com/a-python-sqlite3-context-manager-gotcha/
 
 class DailyTaskDB:
     __DB_LOCATION = 'daily-task/tasks_db_operations.db'
@@ -10,6 +11,8 @@ class DailyTaskDB:
         self.conn = sqlite3.connect(DailyTaskDB.__DB_LOCATION)
         self.cursor = self.conn.cursor()
 
+    #"""
+    #Uselless? 
     # Context Manager Capabilities
 
     def __enter__(self):
@@ -22,14 +25,11 @@ class DailyTaskDB:
         else:
             self.conn.commit()
         self.conn.close()
-
-    def __del__(self):
-        self.conn.close()
-
+    #"""
+    
     # DB Functions 
 
     def create_tables(self):
-
         # Child Table
         self.cursor.execute("DROP TABLE IF EXISTS tasks")
         qry_tasks = """ CREATE TABLE tasks (
@@ -53,18 +53,17 @@ class DailyTaskDB:
         self.cursor.execute(qry_topics)
         print('table topics is ready!')
 
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (0, '');"""
-        self.execute(poptbl)
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (1, 'Geo');"""
-        self.execute(poptbl)
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (2, 'Math');"""
-        self.execute(poptbl)
-        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (3, 'Chemistry');"""
-        self.execute(poptbl)
-
-    def execute(self, qry):
-        self.cursor.execute(qry)
+        poptbl = """INSERT INTO topics (topic_id, topic_name) VALUES (?, ?);"""
+        self.populate(poptbl, (0, ""))
+        self.populate(poptbl, (1, "Math"))
+        self.populate(poptbl, (2, "Geography"))
+        self.populate(poptbl, (3, "Chemistry"))
+        self.populate(poptbl, (4, "Physics"))
+    
+    def populate(self, qry, row):
+        self.cursor.execute(qry, row)
         self.conn.commit()
-        
+
+    
         #self.topics = self.cursor.execute("SELECT * FROM topics").fetchall()
     
