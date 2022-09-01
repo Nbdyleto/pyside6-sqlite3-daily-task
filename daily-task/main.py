@@ -1,10 +1,12 @@
-from pickle import NONE
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QListWidgetItem, QTableWidgetItem, QMessageBox, QCheckBox
 from PySide6.QtCore import QDate, QPoint, QSize
 from PySide6.QtGui import QBrush, QColor, QIcon, Qt
 from ui_main import Ui_Form
 import sys
 import sqlite3
+
+from tasks_db_operations import DailyTaskDB
+
 
 class Window(QWidget):
     def __init__(self):

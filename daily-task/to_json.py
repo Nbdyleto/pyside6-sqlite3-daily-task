@@ -1,6 +1,18 @@
 import json
 import sqlite3
 
+class DataBase:
+    __DB_LOCATION = 'daily-task/data.db'
+    def __init__(self):
+        self.conn = sqlite3.connect(__DB_LOCATION)
+        self.cursor = self.conn.cursor()
+    
+    def close(self):
+        self.cursor.close()
+     
+    def execute(self, row):
+        self.cursor.execute(row)
+
 # Create a ImportExport class to do this.
 
 def export_to_json():
